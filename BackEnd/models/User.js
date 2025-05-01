@@ -26,14 +26,20 @@ const userSchema = new mongoose.Schema({
   studentId: {
     type: String
   },
-  colleges: {
-    type: [String]
+  college: {
+    type: String
   },
-  majors: {
-    type: [String]
+  major: {
+    type: String
   },
   email: {
-    type: String
+    type: String,
+    validate: {
+      validator: function(v) {
+        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v);
+      },
+      message: props => `${props.value} 不是有效的邮箱地址！`
+    }
   },
   signature: {
     type: String,
@@ -47,22 +53,22 @@ const userSchema = new mongoose.Schema({
 
 // 密码加密中间件
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next()
+  if (!this.isModified('password')) return next();
   
   try {
-    const salt = await bcrypt.genSalt(10)
-    this.password = await bcrypt.hash(this.password, salt)
-    next()
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
   } catch (error) {
-    next(new Error('密码加密失败'))
+    next(new Error('密码加密失败'));
   }
-})
+});
 
 userSchema.methods.toJSON = function() {
-  const user = this.toObject()
-  delete user.password
-  delete user.__v
-  return user
-}
+  const user = this.toObject();
+  delete user.password;
+  delete user.__v;
+  return user;
+};
 
 export default mongoose.model('User', userSchema);

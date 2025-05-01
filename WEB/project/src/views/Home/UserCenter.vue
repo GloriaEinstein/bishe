@@ -58,8 +58,7 @@
         <el-select 
           v-model="userInfo.user.major" 
           placeholder="请先选择学院"
-          :disabled="!userInfo.user.college"
-          @click.native="handleMajorClick"
+          @blur="updateUser"
         >
           <el-option 
             v-for="major in currentMajors" 
@@ -99,7 +98,7 @@ const collegeMajorMap = {
     { label: '地质工程', value: '地质工程' },
     { label: '资源勘察工程', value: '资源勘察工程' },
     { label: '测绘工程', value: '测绘工程' },
-    { label: '人文地理与城乡规划', value: '矿物加工工程' },
+    { label: '人文地理与城乡规划', value: '人文地理与城乡测绘' },
   ],
   '环境与化工学院': [
     { label: '化学工程与工艺', value: '化学工程与工艺' },
@@ -190,7 +189,7 @@ export default {
     return {
       defaultAvatar: require('@/assets/default-avatar.png'),
       uploadUrl: process.env.VUE_APP_API_BASE_URL + '/user/uploadAvatar',
-      collegeMajorMap
+      collegeMajorMap,
     }
   },
   computed: {
@@ -216,12 +215,6 @@ export default {
     handleCollegeChange() {
       this.userInfo.user.major = '' // 清空已选专业
       this.updateUser()
-    },
-
-    handleMajorClick() {
-      if (!this.userInfo.user.college) {
-        this.$message.warning('请先选择学院')
-      }
     },
 
     async updateUser() {

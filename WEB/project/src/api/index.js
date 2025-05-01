@@ -7,7 +7,7 @@ export default {
   },
   user: {
     getInfo: () => request.get('/users/info'),
-    update: (data) => request.patch('/users/update', data),
+    update: (data) => request.post('/users/update', data),
     uploadAvatar: (file) => {
       const formData = new FormData()
       formData.append('avatar', file)

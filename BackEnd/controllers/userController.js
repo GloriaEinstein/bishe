@@ -13,9 +13,16 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
+    const { college, major, email } = req.body;
+    const updateData = {
+      ...req.body,
+      college,
+      major,
+      email
+    };
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { $set: req.body },
+      { $set: updateData },
       { new: true }
     );
     successResponse(res, { user }, '更新资料成功');
