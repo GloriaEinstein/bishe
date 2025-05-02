@@ -201,9 +201,11 @@ export default {
       }
     },
     currentMajors() {
-      return this.userInfo.user.college 
+      const majors = this.userInfo.user.college 
         ? collegeMajorMap[this.userInfo.user.college] || []
-        : []
+        : [];
+      console.log('当前专业列表:', majors); // 调试用
+      return majors;
     }
   },
   mounted() {
@@ -219,6 +221,7 @@ export default {
 
     async updateUser() {
       try {
+      console.log('提交的用户信息:', this.userInfo.user);
         await this.updateProfile(this.userInfo.user)
         this.$message.success('资料更新成功')
       } catch (error) {
