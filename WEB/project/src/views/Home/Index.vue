@@ -15,6 +15,38 @@
           <i class="el-icon-s-platform"></i>
           <span>活动大厅</span>
         </el-menu-item>
+        <el-menu-item index="/user-profile">
+          <i class="el-icon-s-custom"></i>
+          <span>用户画像</span>
+        </el-menu-item>
+        <el-menu-item index="/intelligent-recommendation">
+          <i class="el-icon-star-on"></i>
+          <span>智能推荐</span>
+        </el-menu-item>
+        <el-menu-item index="/system-notification">
+          <i class="el-icon-bell"></i>
+          <span>系统通知</span>
+        </el-menu-item>
+        <el-menu-item index="/campus-news">
+          <i class="el-icon-news"></i>
+          <span>校园新闻</span>
+        </el-menu-item>
+        <el-menu-item index="/system-announcement">
+          <i class="el-icon-setting"></i>
+          <span>系统公告</span>
+        </el-menu-item>
+        <el-menu-item index="/activity-publish">
+          <i class="el-icon-circle-plus"></i>
+          <span>活动发布</span>
+        </el-menu-item>
+        <el-menu-item index="/user-review">
+          <i class="el-icon-check"></i>
+          <span>用户审核</span>
+        </el-menu-item>
+        <el-menu-item index="/notification-publish">
+          <i class="el-icon-edit"></i>
+          <span>通知发布</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 

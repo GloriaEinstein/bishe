@@ -29,9 +29,46 @@ const router = new Router({
           component: () => import('@/views/Home/ActivityHall')
         },
         {
-          path: '',
-          redirect: '/user-center'
+          path: '/user-profile',
+          name: 'UserProfile',
+          component: () => import('@/views/Home/UserProfile'),
+        },
+        {
+          path:'/intelligent-recommendation',
+          name: 'IntelligentRecommendation',
+          component: () => import('@/views/Home/IntelligentRecommendation'),
+        },
+        {
+          path:'/system-notification',
+          name: 'SystemNotification',
+          component: () => import('@/views/Home/SystemNotification'),
+        },
+        {
+          path:'/campus-news',
+          name: 'CampusNews',
+          component: () => import('@/views/Home/CampusNews'),
+        },
+        {
+          path:'system-announcement',
+          name: 'SystemAnnouncement',
+          component: () => import('@/views/Home/SystemAnnouncement'),
+        },
+        {
+          path:'/activity-publish',
+          name: 'ActivityPublish',
+          component: () => import('@/views/Home/ActivityPublish'),
+        },
+        {
+          path:'user-review',
+          name: 'UserReview',
+          component: () => import('@/views/Home/UserReview'),
+        },
+        {
+          path:'notification-publish',
+          name: 'NotificationPublish',
+          component: () => import('@/views/Home/NotificationPublish'),
         }
+        
       ]
     }
   ]
