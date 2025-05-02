@@ -1,3 +1,4 @@
+// bishe4/WEB/project/src/api/index.js
 import request from '@/utils/request'
 
 export default {
@@ -17,5 +18,11 @@ export default {
         }
       })
     }
+  },
+  notification: {
+    publish: (data) => request.post('/notifications/publish', data),
+    getList: () => request.get('/notifications/list'),
+    markAsRead: (notificationId) => request.put(`/notifications/${notificationId}/mark-as-read`),
+    getUnreadCount: () => request.get('/notifications/unreadCount')
   }
 }

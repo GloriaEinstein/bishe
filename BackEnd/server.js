@@ -6,6 +6,7 @@ import { connectDB } from './utils/db.js'
 import config from './config/index.js'
 import authRouter from './routes/auth.js'
 import userRouter from './routes/user.js'
+import notificationRouter from './routes/notification.js';
 import { errorHandler } from './middlewares/authMiddleware.js'
 
 const app = express()
@@ -38,6 +39,7 @@ app.get('/', (req, res) => {
 // 路由
 app.use('/api/auth', authRouter)
 app.use('/api/users', userRouter)
+app.use('/api/notifications', notificationRouter);
 
 // 错误处理
 app.use(errorHandler)

@@ -26,6 +26,7 @@
         <el-menu-item index="/system-notification">
           <i class="el-icon-bell"></i>
           <span>系统通知</span>
+          <!-- <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="ml-2"></el-badge> -->
         </el-menu-item>
         <el-menu-item index="/campus-news">
           <i class="el-icon-news"></i>
@@ -59,16 +60,32 @@
 </template>
 
 <script>
+import api from '@/api'
+
 export default {
   name: 'HomeLayout',
+  data() {
+    return {
+      unreadCount: 0
+    }
+  },
   computed: {
     activeMenu() {
       return this.$route.path
     }
   },
+  async mounted() {
+    try {
+      const { data } = await api.notification.getList();
+      const unreadNotifications = data.notifications.filter(notification => !notification.isRead);
+      this.unreadCount = unreadNotifications.length;
+    } catch (error) {
+      console.error('获取通知列表失败', error);
+    }
+  },
   methods: {
     handleMenuSelect(index) {
-      this.$router.push(index)
+      this.$router.push(index);
     }
   }
 }
@@ -108,5 +125,9 @@ export default {
 .el-menu-item {
   height: 56px;
   line-height: 56px;
+}
+
+.ml-2 {
+  margin-left: 8px;
 }
 </style>
