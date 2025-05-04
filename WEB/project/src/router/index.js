@@ -49,7 +49,7 @@ const router = new Router({
           component: () => import('@/views/Home/CampusNews'),
         },
         {
-          path:'system-announcement',
+          path:'/system-announcement',
           name: 'SystemAnnouncement',
           component: () => import('@/views/Home/SystemAnnouncement'),
         },
@@ -59,14 +59,29 @@ const router = new Router({
           component: () => import('@/views/Home/ActivityPublish'),
         },
         {
-          path:'user-review',
+          path:'/user-review',
           name: 'UserReview',
           component: () => import('@/views/Home/UserReview'),
         },
         {
-          path:'notification-publish',
+          path:'/notification-publish',
           name: 'NotificationPublish',
           component: () => import('@/views/Home/NotificationPublish'),
+        },
+        {
+          path:'/news-publish',
+          name: 'NewsPublish',
+          component: () => import('@/views/Home/NewsPublish'),
+        },
+        {
+          path:'/announcement-publish',
+          name: 'AnnouncementPublish',
+          component: () => import('@/views/Home/AnnouncementPublish'),
+        },
+        {
+          path:'/report-management',
+          name: 'ReportManagement',
+          component: () => import('@/views/Home/ReportManagement'),
         }
         
       ]

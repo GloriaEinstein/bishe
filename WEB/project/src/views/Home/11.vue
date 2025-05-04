@@ -7,14 +7,70 @@
         router
         @select="handleMenuSelect"
       >
-        <!-- 其他菜单项 -->
-        <el-menu-item index="/system-notification">
+        <!-- 公共菜单项 -->
+        <el-menu-item index="/user-center">
+          <i class="el-icon-user"></i>
+          <span>用户中心</span>
+        </el-menu-item>
+
+        <!-- 志愿者菜单项 -->
+        <el-menu-item v-if="userType === 'volunteer'" index="/activity-hall">
+          <i class="el-icon-s-platform"></i>
+          <span>活动大厅</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'volunteer'" index="/user-profile">
+          <i class="el-icon-s-custom"></i>
+          <span>用户画像</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'volunteer'" index="/intelligent-recommendation">
+          <i class="el-icon-star-on"></i>
+          <span>智能推荐</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'volunteer'" index="/system-notification">
           <i class="el-icon-bell"></i>
           <span>系统通知</span>
-          <!-- 显示红色气泡提示 -->
-          <span v-if="unreadNotificationCount > 0" class="red-bubble">{{ unreadNotificationCount }}</span>
+          <!-- <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="ml-2"></el-badge> -->
         </el-menu-item>
-        <!-- 其他菜单项 -->
+        <el-menu-item v-if="userType === 'volunteer'" index="/campus-news">
+          <i class="el-icon-news"></i>
+          <span>校园新闻</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'volunteer'" index="/system-announcement">
+          <i class="el-icon-setting"></i>
+          <span>系统公告</span>
+        </el-menu-item>
+
+        <!-- 校组织菜单项 -->
+        <el-menu-item v-if="userType === 'schoolOrganization'" index="/activity-publish">
+          <i class="el-icon-circle-plus"></i>
+          <span>活动发布</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'schoolOrganization'" index="/news-publish">
+          <i class="el-icon-edit"></i>
+          <span>新闻发布</span>
+        </el-menu-item>
+
+        <!-- 管理员菜单项 -->
+        <el-menu-item v-if="userType === 'admin'" index="/activity-hall">
+          <i class="el-icon-s-platform"></i>
+          <span>活动大厅</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'admin'" index="/user-review">
+          <i class="el-icon-check"></i>
+          <span>用户审核</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'admin'" index="/notification-publish">
+          <i class="el-icon-edit"></i>
+          <span>通知发布</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'admin'" index="/announcement-publish">
+          <i class="el-icon-setting"></i>
+          <span>公告发布</span>
+        </el-menu-item>
+        <el-menu-item v-if="userType === 'admin'" index="/report-management">
+          <i class="el-icon-warning"></i>
+          <span>举报管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -27,29 +83,40 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import api from '@/api'
+import { mapState } from 'vuex'
 
 export default {
   name: 'HomeLayout',
+  data() {
+    return {
+      unreadCount: 0
+    }
+  },
   computed: {
-    ...mapState('user', ['unreadNotificationCount']),
     activeMenu() {
-      return this.$route.path;
+      return this.$route.path
+    },
+    ...mapState('user', ['userInfo']),
+    userType() {
+      return this.userInfo ? this.userInfo.userType : 'volunteer'
     }
   },
   async mounted() {
-    await this.fetchUnreadNotificationCount();
+    try {
+      const { data } = await api.notification.getList();
+      const unreadNotifications = data.notifications.filter(notification => !notification.isRead);
+      this.unreadCount = unreadNotifications.length;
+    } catch (error) {
+      console.error('获取通知列表失败', error);
+    }
   },
   methods: {
-    ...mapActions('user', ['fetchUnreadNotificationCount']),
     handleMenuSelect(index) {
-      if (index === '/system-notification') {
-        this.$store.commit('user/SET_UNREAD_NOTIFICATION_COUNT', 0); // 点击系统通知栏，清除未读通知数量
-      }
       this.$router.push(index);
     }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -71,33 +138,5 @@ export default {
   justify-content: center;
   font-size: 18px;
   font-weight: bold;
-  background-color: rgba(24, 144, 255, 0.1);
-}
-
-.el-main {
-  padding: 20px;
-  background-color: #f0f2f5;
-}
-
-.el-menu {
-  border-right: none;
-}
-
-.el-menu-item {
-  height: 56px;
-  line-height: 56px;
-  position: relative;
-}
-
-/* 红色气泡样式 */
-.red-bubble {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: red;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 12px;
 }
 </style>

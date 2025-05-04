@@ -21,6 +21,13 @@
             <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入密码"/>
           </el-form-item>
 
+          <el-form-item v-if="!isLogin" label="用户类型" prop="userType">
+            <el-select v-model="form.userType" placeholder="请选择用户类型">
+              <el-option label="志愿者" value="志愿者"></el-option>
+              <el-option label="校组织" value="校组织"></el-option>
+            </el-select>
+          </el-form-item>
+
           <el-form-item>
             <el-button 
               type="primary" 
@@ -38,18 +45,18 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions } from 'vuex';
 
 export default {
   name: 'AuthLogin',
   data() {
     const validatePass = (rule, value, callback) => {
       if (value !== this.form.password) {
-        callback(new Error('两次输入密码不一致!'))
+        callback(new Error('两次输入密码不一致!'));
       } else {
-        callback()
+        callback();
       }
-    }
+    };
 
     return {
       isLogin: true,
@@ -57,7 +64,8 @@ export default {
       form: {
         username: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        userType: '志愿者'
       },
       rules: {
         username: [
@@ -73,36 +81,34 @@ export default {
           { validator: validatePass, trigger: 'blur' }
         ]
       }
-    }
+    };
   },
   methods: {
     ...mapActions('user', ['login', 'register']),
     
     toggleForm(isLogin) {
-      this.isLogin = isLogin
-      this.$refs.form.resetFields()
+      this.isLogin = isLogin;
+      this.$refs.form.resetFields();
     },
 
     async handleSubmit() {
       try {
-        this.loading = true
-        await this.$refs.form.validate()
+        this.loading = true;
+        await this.$refs.form.validate();
         
-        const action = this.isLogin ? 'login' : 'register'
-        await this[action](this.form)
+        const action = this.isLogin ? 'login' : 'register';
+        await this[action](this.form);
         
-        this.$message.success('登录成功！')
-        this.$router.push(this.$route.query.redirect || '/')
+        this.$message.success('登录成功！');
+        this.$router.push(this.$route.query.redirect || '/');
       } catch (error) {
-        if (error.message) {
-          this.$message.error(error.message)
-        }
+        // 处理错误
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>

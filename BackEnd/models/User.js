@@ -48,6 +48,11 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  userType: {
+    type: String,
+    enum: ['volunteer', 'schoolOrganization', 'admin'],
+    default: 'volunteer'
   }
 });
 

@@ -6,7 +6,7 @@
 
       <div class="avatar-section" v-if="userInfo">
         <el-image
-          :src="userInfo.avatar || defaultAvatar"
+          :src="userInfo.user.avatar || defaultAvatar"
           fit="cover"
           class="avatar"
         />
@@ -20,7 +20,8 @@
         </el-upload>
       </div>
 
-      <el-form :model="userInfo" label-width="80px" v-if="userInfo">
+      <!-- 志愿者展示内容 -->
+      <el-form :model="userInfo" label-width="80px" v-if="userInfo.user.userType === 'volunteer'">
         <el-form-item label="用户名">
           <el-input v-model="userInfo.user.username" disabled />
         </el-form-item>
@@ -31,43 +32,43 @@
           <el-input v-model="userInfo.user.studentId" @blur="updateUser" />
         </el-form-item>
         <el-form-item label="学院">
-        <el-select 
-          v-model="userInfo.user.college" 
-          placeholder="请选择学院"
-          @change="handleCollegeChange"
-        >
-          <el-option label="矿业工程学院" value="矿业工程学院" />
-          <el-option label="环境与化工学院" value="环境与化工学院" />
-          <el-option label="安全工程学院" value="安全工程学院" />
-          <el-option label="电气与控制工程学院" value="电气与控制工程学院" />
-          <el-option label="电子与信息工程学院" value="电子与信息工程学院" />
-          <el-option label="机械工程学院" value="机械工程学院" />
-          <el-option label="经济学院" value="经济学院" />
-          <el-option label="管理学院" value="管理学院" />
-          <el-option label="建筑工程学院" value="建筑工程学院" />
-          <el-option label="马克思主义学院" value="马克思主义学院" />
-          <el-option label="人文与社会科学学院" value="人文与社会科学学院" />
-          <el-option label="计算机与信息工程学院" value="计算机与信息工程学院" />
-          <el-option label="材料科学与工程学院" value="材料科学与工程学院" />
-          <el-option label="理学院" value="理学院" />
-          <el-option label="外国语学院" value="外国语学院" />
-          <el-option label="国际教育学院" value="国际教育学院" />
-        </el-select>
-      </el-form-item>
+          <el-select 
+            v-model="userInfo.user.college" 
+            placeholder="请选择学院"
+            @change="handleCollegeChange"
+          >
+            <el-option label="矿业工程学院" value="矿业工程学院" />
+            <el-option label="环境与化工学院" value="环境与化工学院" />
+            <el-option label="安全工程学院" value="安全工程学院" />
+            <el-option label="电气与控制工程学院" value="电气与控制工程学院" />
+            <el-option label="电子与信息工程学院" value="电子与信息工程学院" />
+            <el-option label="机械工程学院" value="机械工程学院" />
+            <el-option label="经济学院" value="经济学院" />
+            <el-option label="管理学院" value="管理学院" />
+            <el-option label="建筑工程学院" value="建筑工程学院" />
+            <el-option label="马克思主义学院" value="马克思主义学院" />
+            <el-option label="人文与社会科学学院" value="人文与社会科学学院" />
+            <el-option label="计算机与信息工程学院" value="计算机与信息工程学院" />
+            <el-option label="材料科学与工程学院" value="材料科学与工程学院" />
+            <el-option label="理学院" value="理学院" />
+            <el-option label="外国语学院" value="外国语学院" />
+            <el-option label="国际教育学院" value="国际教育学院" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="专业">
-        <el-select 
-          v-model="userInfo.user.major" 
-          placeholder="请先选择学院"
-          @blur="updateUser"
-        >
-          <el-option 
-            v-for="major in currentMajors" 
-            :key="major.value" 
-            :label="major.label" 
-            :value="major.value" 
-          />
-        </el-select>
-      </el-form-item>
+          <el-select 
+            v-model="userInfo.user.major" 
+            placeholder="请先选择学院"
+            @blur="updateUser"
+          >
+            <el-option 
+              v-for="major in currentMajors" 
+              :key="major.value" 
+              :label="major.label" 
+              :value="major.value" 
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="邮箱">
           <el-input v-model="userInfo.user.email" @blur="updateUser" />
         </el-form-item>
@@ -77,6 +78,23 @@
             type="textarea"
             @blur="updateUser"
           />
+        </el-form-item>
+      </el-form>
+
+      <!-- 校组织展示内容 -->
+      <el-form :model="userInfo" label-width="80px" v-if="userInfo.user.userType === 'schoolOrganization'">
+        <el-form-item label="用户名">
+          <el-input v-model="userInfo.user.username" disabled />
+        </el-form-item>
+        <el-form-item label="校组织名称">
+          <el-input v-model="userInfo.user.name" @blur="updateUser" />
+        </el-form-item>
+      </el-form>
+
+      <!-- 管理员展示内容 -->
+      <el-form :model="userInfo" label-width="80px" v-if="userInfo.user.userType === 'admin'">
+        <el-form-item label="用户名">
+          <el-input v-model="userInfo.user.username" disabled />
         </el-form-item>
       </el-form>
 
@@ -221,7 +239,7 @@ export default {
 
     async updateUser() {
       try {
-      console.log('提交的用户信息:', this.userInfo.user);
+        console.log('提交的用户信息:', this.userInfo.user);
         await this.updateProfile(this.userInfo.user)
         this.$message.success('资料更新成功')
       } catch (error) {
