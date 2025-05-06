@@ -49,3 +49,29 @@ export const uploadAvatar = async (req, res) => {
     errorResponse(res, 500, '头像上传失败');
   }
 };
+
+export const verifyUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isVerified: true },
+      { new: true }
+    );
+    if (!user) {
+      return errorResponse(res, 404, '用户不存在');
+    }
+    successResponse(res, { user }, '用户审核通过');
+  } catch (error) {
+    errorResponse(res, 500, '审核用户失败');
+  }
+};
+
+export const getUnverifiedUsers = async (req, res) => {
+  try {
+    const users = await User.find({ userType: 'schoolOrganization', isVerified: false });
+    successResponse(res, { users }, '获取未审核用户列表成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取未审核用户列表失败');
+  }
+};

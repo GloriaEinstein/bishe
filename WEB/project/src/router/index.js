@@ -89,6 +89,26 @@ const router = new Router({
   ]
 })
 
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => {
+    if (err.name !== 'NavigationDuplicated' &&!err.message.includes('Navigation cancelled')) {
+      // 如果不是导航重复或导航取消的错误，重新抛出
+      throw err
+    }
+  })
+}
+
+const originalReplace = Router.prototype.replace
+Router.prototype.replace = function replace(location) {
+  return originalReplace.call(this, location).catch(err => {
+    if (err.name !== 'NavigationDuplicated' &&!err.message.includes('Navigation cancelled')) {
+      // 如果不是导航重复或导航取消的错误，重新抛出
+      throw err
+    }
+  })
+}
+
 router.beforeEach((to, from, next) => {
   const isAuthenticated = store.state.user.token
   

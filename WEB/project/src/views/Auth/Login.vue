@@ -23,8 +23,8 @@
 
           <el-form-item v-if="!isLogin" label="用户类型" prop="userType">
             <el-select v-model="form.userType" placeholder="请选择用户类型">
-              <el-option label="志愿者" value="志愿者"></el-option>
-              <el-option label="校组织" value="校组织"></el-option>
+              <el-option label="志愿者" value="volunteer"></el-option>
+              <el-option label="校组织" value="schoolOrganization"></el-option>
             </el-select>
           </el-form-item>
 
@@ -65,7 +65,7 @@ export default {
         username: '',
         password: '',
         confirmPassword: '',
-        userType: '志愿者'
+        userType: 'volunteer'
       },
       rules: {
         username: [
@@ -97,10 +97,14 @@ export default {
         await this.$refs.form.validate();
         
         const action = this.isLogin ? 'login' : 'register';
-        await this[action](this.form);
+        const response = await this[action](this.form);
         
-        this.$message.success('登录成功！');
-        this.$router.push(this.$route.query.redirect || '/');
+        if (action === 'register' && response.message === '注册申请已提交，请等待管理员审核') {
+          this.$message.success('注册申请已提交，请等待管理员审核');
+        } else {
+          this.$message.success('登录成功！');
+          this.$router.push(this.$route.query.redirect || '/');
+        }
       } catch (error) {
         // 处理错误
       } finally {

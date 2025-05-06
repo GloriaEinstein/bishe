@@ -53,6 +53,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['volunteer', 'schoolOrganization', 'admin'],
     default: 'volunteer'
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
   }
 });
 
