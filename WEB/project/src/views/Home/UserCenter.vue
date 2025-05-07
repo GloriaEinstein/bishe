@@ -55,7 +55,7 @@
             <el-option label="国际教育学院" value="国际教育学院" />
           </el-select>
         </el-form-item>
-        <el-form-item label="专业">
+        <!-- <el-form-item label="专业">
           <el-select 
             v-model="userInfo.user.major" 
             placeholder="请先选择学院"
@@ -68,7 +68,7 @@
               :value="major.value" 
             />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="邮箱">
           <el-input v-model="userInfo.user.email" @blur="updateUser" />
         </el-form-item>

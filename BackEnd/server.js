@@ -7,6 +7,9 @@ import config from './config/index.js'
 import authRouter from './routes/auth.js'
 import userRouter from './routes/user.js'
 import notificationRouter from './routes/notification.js';
+import announcementRoutes from './routes/announcement.js';
+import newsRoutes from './routes/news.js';
+import activityRoutes from './routes/activity.js';
 import { errorHandler } from './middlewares/authMiddleware.js'
 
 const app = express()
@@ -40,6 +43,9 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRouter)
 app.use('/api/users', userRouter)
 app.use('/api/notifications', notificationRouter);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/activity', activityRoutes);
 
 // 错误处理
 app.use(errorHandler)

@@ -26,5 +26,17 @@ export default {
     getList: () => request.get('/notifications/list'),
     markAsRead: (notificationId) => request.put(`/notifications/${notificationId}/mark-as-read`),
     getUnreadCount: () => request.get('/notifications/unreadCount')
+  },
+  announcement: {
+    publish: (data) => request.post('/announcements/publish', data),
+    getList: () => request.get('/announcements/list')
+  },
+  news: {
+    publish: (data) => request.post('/news/publish', data),
+    getList: () => request.get('/news/list')
+  },
+  activity: {
+    publish: (data) => request.post('/activity/publish', data),
+    getList: () => request.get('/activity/list')
   }
 };
