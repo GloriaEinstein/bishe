@@ -1,30 +1,99 @@
-// bishe4/WEB/project/src/api/index.js
-import request from '@/utils/request';
+<template>
+  <el-container class="home-container">
+    <el-aside width="200px" class="sidebar">
+      <div class="logo">志愿者管理平台</div>
+      <el-menu
+        :default-active="activeMenu"
+        router
+        @select="handleMenuSelect"
+      >
+        <!-- 志愿者菜单项 -->
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/user-center">
+          <i class="el-icon-user"></i>
+          <span>用户中心</span>
+        </el-menu-item>
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/activity-hall">
+          <i class="el-icon-s-platform"></i>
+          <span>活动大厅</span>
+        </el-menu-item>
+        <!-- 其他菜单项同理添加 hasUserInfo 检查 -->
+      </el-menu>
+    </el-aside>
+
+    <el-container>
+      <el-main>
+        <router-view/>
+      </el-main>
+    </el-container>
+  </el-container>
+</template>
+
+<script>
+import api from '@/api'
+import { mapState } from 'vuex'
 
 export default {
-  auth: {
-    login: (data) => request.post('/auth/login', data),
-    register: (data) => request.post('/auth/register', data)
+  name: 'HomeLayout',
+  data() {
+    return {
+      unreadCount: 0
+    }
   },
-  user: {
-    getInfo: () => request.get('/users/info'),
-    update: (data) => request.post('/users/update', data),
-    uploadAvatar: (file) => {
-      const formData = new FormData();
-      formData.append('avatar', file);
-      return request.post('/users/uploadAvatar', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+  computed: {
+    activeMenu() {
+      return this.$route.path
     },
-    getUnverifiedUsers: () => request.get('/users/unverified'),
-    verifyUser: (userId) => request.put(`/users/verify/${userId}`)
+    ...mapState('user', ['userInfo']),
+    hasUserInfo() {
+      return this.userInfo && this.userInfo.user;
+    }
   },
-  notification: {
-    publish: (data) => request.post('/notifications/publish', data),
-    getList: () => request.get('/notifications/list'),
-    markAsRead: (notificationId) => request.put(`/notifications/${notificationId}/mark-as-read`),
-    getUnreadCount: () => request.get('/notifications/unreadCount')
+  async mounted() {
+    try {
+      const { data } = await api.notification.getList();
+      const unreadNotifications = data.notifications.filter(notification => !notification.isRead);
+      this.unreadCount = unreadNotifications.length;
+    } catch (error) {
+      console.error('获取通知列表失败', error);
+    }
+    this.$store.dispatch('user/fetchUserInfo')
+  },
+  methods: {
+    handleMenuSelect(index) {
+      this.$router.push(index);
+    },
+    async fetchUserInfo() {
+      try {
+        const response = await api.get('/user/info', {
+          headers: this.headers
+        })
+        this.$store.commit('user/setUser', response.data.data)
+      } catch (error) {
+        console.error('获取用户信息失败', error);
+      }
+    },
   }
-};
+}
+</script>
+
+<style scoped>
+.home-container {
+  height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  width: 200px;
+  background: white;
+  border-right: 1px solid #d9d9d9;
+}
+
+.logo {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+</style>
