@@ -1,6 +1,13 @@
 // bishe4/WEB/project/src/api/index.js
 import request from '@/utils/request';
 
+const getAuthHeader = () => {
+  const token = store.state.user.token;
+  return {
+    Authorization: `Bearer ${token}`
+  };
+};
+
 export default {
   auth: {
     login: (data) => request.post('/auth/login', data),
@@ -14,6 +21,7 @@ export default {
       formData.append('avatar', file);
       return request.post('/users/uploadAvatar', formData, {
         headers: {
+          ...getAuthHeader(),
           'Content-Type': 'multipart/form-data'
         }
       });

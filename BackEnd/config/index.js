@@ -1,5 +1,5 @@
 // config/index.js
-import path from 'path'  // 添加模块导入
+import path from 'path';
 
 export default {
   jwt: {
@@ -10,12 +10,12 @@ export default {
     limits: {
       fileSize: 2 * 1024 * 1024 // 2MB
     },
-    avatarPath: path.join(process.cwd(), 'uploads/avatar') // 现在可以正确使用path
+    avatarPath: path.join(process.cwd(), 'src/uploads/avatar') // 修改为 src 下的文件夹
   },
   corsOptions: {
-    origin:'http://localhost:8080',
+    origin: 'http://localhost:8080',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   }
-}
+};

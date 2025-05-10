@@ -36,15 +36,18 @@ export const uploadAvatar = async (req, res) => {
     if (!req.file) {
       return errorResponse(res, 400, '请上传头像文件');
     }
-    
-    const avatarPath = await processAvatar(req.file.buffer, req.user._id);
-    const user = await User.findByIdAndUpdate(
+
+    const user = await User.findById(req.user._id);
+    const oldAvatarPath = user.avatar;
+
+    const avatarPath = await processAvatar(req.file.buffer, req.user._id, oldAvatarPath);
+    const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { avatar: avatarPath },
       { new: true }
     );
-    
-    successResponse(res, { avatar: user.avatar }, '头像上传成功');
+
+    successResponse(res, { avatar: updatedUser.avatar }, '头像上传成功');
   } catch (error) {
     errorResponse(res, 500, '头像上传失败');
   }

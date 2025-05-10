@@ -206,7 +206,7 @@ export default {
   data() {
     return {
       defaultAvatar: require('@/assets/default-avatar.png'),
-      uploadUrl: process.env.VUE_APP_API_BASE_URL + '/user/uploadAvatar',
+      uploadUrl: 'http://localhost:3000/api/users/uploadAvatar',
       collegeMajorMap,
     }
   },
@@ -215,7 +215,7 @@ export default {
     headers() {
       const token = localStorage.getItem('authToken')
       return {
-        Authorization: `Bearer ${token}`
+        Authorization: `${token}`,
       }
     },
     currentMajors() {
