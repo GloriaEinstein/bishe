@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
-    enum: ['volunteer', 'schoolOrganization', 'admin'],
+    enum: ['volunteer', 'schoolOrganization', 'admin','offCampusOrganization'],
     default: 'volunteer'
   },
   isVerified: {

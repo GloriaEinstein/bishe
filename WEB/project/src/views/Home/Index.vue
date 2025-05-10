@@ -52,6 +52,20 @@
           <span>新闻发布</span>
         </el-menu-item>
 
+        <!-- 校外组织菜单项 -->
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'offCampusOrganization'" index="/user-center">
+          <i class="el-icon-user"></i>
+          <span>用户中心</span>
+        </el-menu-item>
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'offCampusOrganization'" index="/activity-publish">
+          <i class="el-icon-circle-plus"></i>
+          <span>活动发布</span>
+        </el-menu-item>
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'offCampusOrganization'" index="/news-publish">
+          <i class="el-icon-edit"></i>
+          <span>新闻发布</span>
+        </el-menu-item>
+
         <!-- 管理员菜单项 -->
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'admin'" index="/user-center">
           <i class="el-icon-user"></i>

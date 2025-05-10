@@ -72,7 +72,10 @@ export const verifyUser = async (req, res) => {
 
 export const getUnverifiedUsers = async (req, res) => {
   try {
-    const users = await User.find({ userType: 'schoolOrganization', isVerified: false });
+    const users = await User.find({ 
+      userType: { $in: ['schoolOrganization', 'offCampusOrganization'] },
+      isVerified: false 
+    });
     successResponse(res, { users }, '获取未审核用户列表成功');
   } catch (error) {
     errorResponse(res, 500, '获取未审核用户列表失败');

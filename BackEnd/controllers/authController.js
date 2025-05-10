@@ -4,11 +4,12 @@ import bcrypt from 'bcryptjs';
 import { successResponse, errorResponse } from '../utils/response.js';
 import config from '../config/index.js';
 
+// bishe10/BackEnd/controllers/authController.js
 export const register = async (req, res) => {
   try {
     const { username, password, userType } = req.body;
     let user;
-    if (userType === 'schoolOrganization') {
+    if (userType === 'schoolOrganization' || userType === 'offCampusOrganization') {
       user = new User({ ...req.body, username: username.trim(), userType, isVerified: false });
       await user.save();
       // 这里可以添加发送审核通知给管理员的逻辑
@@ -25,6 +26,7 @@ export const register = async (req, res) => {
     }
   }
 };
+
 
 export const login = async (req, res) => {
   try {

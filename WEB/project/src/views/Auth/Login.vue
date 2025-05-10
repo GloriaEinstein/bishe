@@ -25,6 +25,7 @@
             <el-select v-model="form.userType" placeholder="请选择用户类型">
               <el-option label="志愿者" value="volunteer"></el-option>
               <el-option label="校组织" value="schoolOrganization"></el-option>
+              <el-option label="校外组织" value="offCampusOrganization"></el-option>
             </el-select>
           </el-form-item>
 

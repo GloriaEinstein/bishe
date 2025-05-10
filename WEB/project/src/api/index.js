@@ -7,8 +7,12 @@ const getAuthHeader = () => {
     Authorization: `Bearer ${token}`
   };
 };
+const activityApi = {
+  getList: (filters) => request.get('/activity/list', { params: filters })
+};
 
 export default {
+  activity: activityApi,
   auth: {
     login: (data) => request.post('/auth/login', data),
     register: (data) => request.post('/auth/register', data)
