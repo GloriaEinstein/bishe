@@ -11,12 +11,20 @@ export const createActivity = async (req, res) => {
       content, 
       activityArea, 
       serviceType, 
-      projectStatus, 
       serviceTarget, 
       participantCount,
       startTime,
       endTime
     } = req.body;
+    let projectStatus;
+    const now = new Date();
+    if (new Date(startTime) > now) {
+      projectStatus = '待启动';
+    } else if (new Date(endTime) < now) {
+      projectStatus = '已结项';
+    } else {
+      projectStatus = '运行中';
+    }
     const activity = await Activity.create({ 
       title, 
       introduction, 
@@ -35,6 +43,26 @@ export const createActivity = async (req, res) => {
     errorResponse(res, 500, '活动发布失败');
   }
 };
+
+export const registerActivity = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const { userId } = req.body;
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return errorResponse(res, 404, '活动未找到');
+    }
+    if (activity.registeredUsers.includes(userId)) {
+      return errorResponse(res, 400, '你已经报名该活动');
+    }
+    activity.registeredUsers.push(userId);
+    await activity.save();
+    successResponse(res, { activity }, '报名成功');
+  } catch (error) {
+    errorResponse(res, 500, '报名失败');
+  }
+};
+
 
 export const getActivities = async (req, res) => {
   try {
@@ -57,6 +85,17 @@ export const getActivities = async (req, res) => {
     }
 
     const activities = await Activity.find(filter).sort({ createdAt: -1 });
+    const now = new Date();
+    activities.forEach(activity => {
+      if (new Date(activity.startTime) > now) {
+        activity.projectStatus = '待启动';
+      } else if (new Date(activity.endTime) < now) {
+        activity.projectStatus = '已结项';
+      } else {
+        activity.projectStatus = '运行中';
+      }
+      activity.save();
+    });
     successResponse(res, { activities }, '获取活动列表成功');
   } catch (error) {
     errorResponse(res, 500, '获取活动列表失败');

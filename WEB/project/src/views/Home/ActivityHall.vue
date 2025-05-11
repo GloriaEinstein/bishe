@@ -62,10 +62,18 @@
         v-for="activity in activities" 
         :key="activity._id"
         class="activity-item"
+        @click="goToActivityDetail(activity._id)"
       >
         <img :src="getImageUrl(activity.serviceType)" alt="activity image">
         <h3>{{ activity.title }}</h3>
         <p>{{ activity.introduction }}</p>
+        <p style="font-size: 12px;">目标人数: {{ activity.participantCount }}，已报名人数: {{ activity.registeredUsers.length }}</p>
+        <el-progress :percentage="(activity.registeredUsers.length / activity.participantCount) * 100" :show-text="false"></el-progress>
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+          <span>{{ (activity.registeredUsers.length / activity.participantCount) * 100 }}%</span>
+          <span>距离结束时间: {{ getTimeLeft(activity.endTime) }}</span>
+        </div>
+        <el-button @click="registerActivity(activity._id)" :disabled="isRegistered(activity)">报名</el-button>
       </div>
     </div>
   </div>
@@ -92,6 +100,35 @@ export default {
     this.fetchActivities();
   },
   methods: {
+    getTimeLeft(endTime) {
+      const now = new Date();
+      const end = new Date(endTime);
+      const diff = end - now;
+      if (diff < 0) {
+        return '已结束';
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      return `${days} 天 ${hours} 小时 ${minutes} 分钟`;
+    },
+    async registerActivity(activityId) {
+      try {
+        const userId = this.$store.state.user.userInfo._id;
+        await api.activity.register(activityId, { userId });
+        this.$message.success('报名成功');
+        this.fetchActivities();
+      } catch (error) {
+        this.$message.error('报名失败');
+      }
+    },
+    isRegistered(activity) {
+      const userId = this.$store.state.user.userInfo._id;
+      return activity.registeredUsers.includes(userId);
+    },
+    goToActivityDetail(activityId) {
+      this.$router.push(`/activity-detail/${activityId}`);
+    },
     formatDate(date) {
       return new Date(date).toLocaleString();
     },

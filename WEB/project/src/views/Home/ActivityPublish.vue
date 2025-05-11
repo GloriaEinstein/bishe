@@ -12,6 +12,7 @@
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 10 }"
             class="auto-resize-textarea"
+            maxlength="15"
           />
         </el-form-item>
         <el-form-item label="内容">
@@ -60,6 +61,7 @@
             v-model="form.startTime"
             type="datetime"
             placeholder="选择活动开始时间"
+            :picker-options="startTimePickerOptions"
           />
         </el-form-item>
         <el-form-item label="活动结束时间">
@@ -67,6 +69,7 @@
             v-model="form.endTime"
             type="datetime"
             placeholder="选择活动结束时间"
+            :picker-options="endTimePickerOptions"
           />
         </el-form-item>
         <el-form-item>
@@ -94,6 +97,45 @@ export default {
         participantCount: 0,
         startTime: null,
         endTime: null
+      },
+      rules: {
+        startTime: [
+          {
+            validator: (rule, value, callback) => {
+              if (value && new Date(value) < new Date()) {
+                callback(new Error('开始时间不能早于当前时间'));
+              } else {
+                callback();
+              }
+            },
+            trigger: 'change'
+          }
+        ],
+        endTime: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.form.startTime && value && new Date(value) < new Date(this.form.startTime)) {
+                callback(new Error('结束时间不能早于开始时间'));
+              } else {
+                callback();
+              }
+            },
+            trigger: 'change'
+          }
+        ]
+      },
+      startTimePickerOptions: {
+        disabledDate: (time) => {
+          return time.getTime() < Date.now() - 8.64e7;
+        }
+      },
+      endTimePickerOptions: {
+        disabledDate: (time) => {
+          if (this.form.startTime) {
+            return time.getTime() < new Date(this.form.startTime).getTime();
+          }
+          return false;
+        }
       }
     }
   },

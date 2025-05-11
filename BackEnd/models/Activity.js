@@ -33,6 +33,12 @@ const activitySchema = new mongoose.Schema({
   participantCount: {
     type: Number
   },
+  registeredUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now
