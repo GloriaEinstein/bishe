@@ -6,6 +6,14 @@
         <el-form-item label="标题">
           <el-input v-model="form.title" />
         </el-form-item>
+        <el-form-item label="简介">
+          <el-input
+            v-model="form.introduction"
+            type="textarea"
+            :autosize="{ minRows: 3, maxRows: 10 }"
+            class="auto-resize-textarea"
+          />
+        </el-form-item>
         <el-form-item label="内容">
           <el-input
             v-model="form.content"
@@ -15,13 +23,34 @@
           />
         </el-form-item>
         <el-form-item label="活动区域">
-          <el-input v-model="form.activityArea" />
+          <el-select v-model="form.activityArea" placeholder="请选择活动区域">
+            <el-option label="校内" value="校内"></el-option>
+            <el-option label="校外" value="校外"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="服务类别">
-          <el-input v-model="form.serviceType" />
+          <el-select v-model="form.serviceType" placeholder="请选择服务类别">
+            <el-option label="社区服务" value="社区服务"></el-option>
+            <el-option label="支教助学" value="支教助学"></el-option>
+            <el-option label="扶贫减贫" value="扶贫减贫"></el-option>
+            <el-option label="卫生健康" value="卫生健康"></el-option>
+            <el-option label="环境保护" value="环境保护"></el-option>
+            <el-option label="文化艺术" value="文化艺术"></el-option>
+            <el-option label="禁毒宣传" value="禁毒宣传"></el-option>
+            <el-option label="关爱特殊群体" value="关爱特殊群体"></el-option>
+            <el-option label="大型活动" value="大型活动"></el-option>
+            <el-option label="其它" value="其它"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="服务对象">
-          <el-input v-model="form.serviceTarget" />
+          <el-select v-model="form.serviceTarget" placeholder="请选择服务对象">
+            <el-option label="儿童" value="儿童"></el-option>
+            <el-option label="妇女" value="妇女"></el-option>
+            <el-option label="老年人" value="老年人"></el-option>
+            <el-option label="残障人士" value="残障人士"></el-option>
+            <el-option label="贫困家庭" value="贫困家庭"></el-option>
+            <el-option label="其它" value="其它"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="项目人数">
           <el-input v-model.number="form.participantCount" type="number" />
@@ -57,6 +86,7 @@ export default {
     return {
       form: {
         title: '',
+        introduction: '', // 新增简介字段
         content: '',
         activityArea: '',
         serviceType: '',
@@ -73,6 +103,7 @@ export default {
         await api.activity.publish(this.form);
         this.$message.success('活动发布成功');
         this.form.title = '';
+        this.form.introduction = ''; // 清空简介字段
         this.form.content = '';
         this.form.activityArea = '';
         this.form.serviceType = '';

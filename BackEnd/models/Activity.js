@@ -6,6 +6,10 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: [true, '活动标题不能为空'],
   },
+  introduction: { // 新增简介字段
+    type: String,
+    required: [true, '活动简介不能为空'],
+  },
   content: {
     type: String,
     required: [true, '活动内容不能为空'],

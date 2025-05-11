@@ -4,8 +4,8 @@ import { successResponse, errorResponse } from '../utils/response.js';
 
 export const createActivity = async (req, res) => {
   try {
-    const { title, content } = req.body;
-    const activity = await Activity.create({ title, content });
+    const { title, introduction, content, area, serviceType, projectStatus, serviceTarget, participantCount } = req.body;
+    const activity = await Activity.create({ title, introduction, content, area, serviceType, projectStatus, serviceTarget, participantCount });
     successResponse(res, { activity }, '活动发布成功');
   } catch (error) {
     errorResponse(res, 500, '活动发布失败');
