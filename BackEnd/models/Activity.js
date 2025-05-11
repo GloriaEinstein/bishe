@@ -14,7 +14,7 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: [true, '活动内容不能为空'],
   },
-  area: {
+  activityArea: {
     type: String,
     enum: ['校内', '校外']
   },
@@ -36,7 +36,13 @@ const activitySchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  startTime: {
+    type: Date,
+  },
+  endTime: {
+    type: Date,
+  },
 });
 
 export default mongoose.model('Activity', activitySchema);

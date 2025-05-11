@@ -57,20 +57,19 @@
       </el-form-item>
     </el-form>
     <el-empty description="暂无活动" v-if="activities.length === 0"/>
-    <div class="activity-list" v-else>
-      <el-card 
+    <div class="activity-list">
+      <div 
         v-for="activity in activities" 
         :key="activity._id"
         class="activity-item"
       >
+        <img :src="getImageUrl(activity.serviceType)" alt="activity image">
         <h3>{{ activity.title }}</h3>
-        <p>{{ activity.content }}</p>
-        <span>{{ formatDate(activity.createdAt) }}</span>
-      </el-card>
+        <p>{{ activity.introduction }}</p>
+      </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import api from '@/api'
@@ -116,6 +115,9 @@ export default {
         participantCount: ''
       };
       this.fetchActivities();
+    },
+    getImageUrl(serviceType) {
+      return require(`@/assets/${serviceType}.png`);
     }
   }
 }
@@ -201,20 +203,16 @@ h2::after {
   transform: translateY(-4px);
 }
 
-.activity-item::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
+.activity-item img {
   width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%);
+  height: auto;
+  object-fit: cover;
 }
 
 .activity-item h3 {
   font-size: 20px;
   color: #2d3436;
-  margin-bottom: 12px;
+  margin: 12px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -223,19 +221,11 @@ h2::after {
   font-size: 15px;
   color: #636e72;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin: 0 12px 12px 12px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.activity-item span {
-  font-size: 13px;
-  color: #7f8c8d;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .el-empty {
