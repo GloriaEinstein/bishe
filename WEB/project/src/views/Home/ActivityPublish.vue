@@ -14,6 +14,32 @@
             class="auto-resize-textarea"
           />
         </el-form-item>
+        <el-form-item label="活动区域">
+          <el-input v-model="form.activityArea" />
+        </el-form-item>
+        <el-form-item label="服务类别">
+          <el-input v-model="form.serviceType" />
+        </el-form-item>
+        <el-form-item label="服务对象">
+          <el-input v-model="form.serviceTarget" />
+        </el-form-item>
+        <el-form-item label="项目人数">
+          <el-input v-model.number="form.participantCount" type="number" />
+        </el-form-item>
+        <el-form-item label="活动开始时间">
+          <el-date-picker
+            v-model="form.startTime"
+            type="datetime"
+            placeholder="选择活动开始时间"
+          />
+        </el-form-item>
+        <el-form-item label="活动结束时间">
+          <el-date-picker
+            v-model="form.endTime"
+            type="datetime"
+            placeholder="选择活动结束时间"
+          />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handlePublish">发布</el-button>
         </el-form-item>
@@ -31,7 +57,13 @@ export default {
     return {
       form: {
         title: '',
-        content: ''
+        content: '',
+        activityArea: '',
+        serviceType: '',
+        serviceTarget: '',
+        participantCount: 0,
+        startTime: null,
+        endTime: null
       }
     }
   },
@@ -42,6 +74,12 @@ export default {
         this.$message.success('活动发布成功');
         this.form.title = '';
         this.form.content = '';
+        this.form.activityArea = '';
+        this.form.serviceType = '';
+        this.form.serviceTarget = '';
+        this.form.participantCount = 0;
+        this.form.startTime = null;
+        this.form.endTime = null;
       } catch (error) {
         this.$message.error('活动发布失败');
       }
@@ -155,7 +193,6 @@ h2::after {
 
   .auto-resize-textarea ::v-deep .el-textarea__inner {
     min-height: 100px;
-    max-height: 300px;
   }
 }
 </style>
