@@ -162,19 +162,19 @@ export default {
 
 <style scoped>
 .activity-hall {
-  padding: 32px 24px;
-  max-width: 1200px;
+  padding: 40px 24px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
 h2 {
-  font-size: 28px;
-  color: #1a1a1a;
-  margin-bottom: 32px;
-  font-weight: 600;
+  font-size: 32px;
+  color: #2d3436;
+  margin-bottom: 48px;
+  font-weight: 700;
   text-align: center;
   position: relative;
-  padding-bottom: 12px;
+  padding-bottom: 16px;
 }
 
 h2::after {
@@ -183,17 +183,24 @@ h2::after {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  border-radius: 2px;
 }
 
 .el-form {
-  background: #f8f9fa;
+  background: rgba(249, 250, 251, 0.8);
   padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 40px;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(209, 213, 219, 0.3);
+  margin-bottom: 48px;
+  transition: all 0.3s ease;
+}
+
+.el-form:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .el-form-item {
@@ -201,90 +208,171 @@ h2::after {
 }
 
 .el-select {
-  width: 180px;
+  width: 200px;
 }
 
 .el-button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 8px !important;
 }
 
 .el-button--primary {
-  background: #6c5ce7 !important;
-  border-color: #6c5ce7 !important;
-  padding: 10px 24px !important;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  border: none !important;
+  padding: 12px 28px !important;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2);
 }
 
 .el-button--primary:hover {
-  background: #5b4bc4 !important;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .activity-list {
   display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 32px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
 .activity-item {
-  border: none !important;
-  border-radius: 12px !important;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  border-radius: 16px !important;
   overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  cursor: pointer;
+  border: 1px solid rgba(229, 231, 235, 0.5);
 }
 
 .activity-item:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.activity-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 70%, rgba(0,0,0,0.03) 100%);
 }
 
 .activity-item img {
   width: 100%;
-  height: auto;
+  height: 200px;
   object-fit: cover;
+  border-radius: 16px 16px 0 0;
 }
 
 .activity-item h3 {
   font-size: 20px;
-  color: #2d3436;
-  margin: 12px;
+  color: #1f2937;
+  margin: 16px;
   font-weight: 600;
   line-height: 1.4;
 }
 
 .activity-item p {
-  font-size: 15px;
-  color: #636e72;
+  font-size: 14px;
+  color: #4b5563;
   line-height: 1.6;
-  margin: 0 12px 12px 12px;
+  margin: 0 16px 16px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+.el-progress {
+  margin: 0 16px 12px;
+}
+
+.el-progress-bar {
+  border-radius: 4px;
+}
+
+.el-progress-bar__inner {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
 .el-empty {
-  margin: 60px 0;
+  margin: 80px 0;
+}
+
+.el-empty__image {
+  width: 240px !important;
+  height: 240px !important;
 }
 
 .el-empty__description {
-  color: #95a5a6 !important;
+  color: #9ca3af !important;
+  font-size: 16px;
+}
+
+/* 卡片内容容器 */
+.activity-item > div {
+  padding: 0 16px 16px;
+}
+
+/* 状态文字样式 */
+.activity-item span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* 报名按钮样式 */
+.activity-item .el-button {
+  width: calc(100% - 32px);
+  margin: 16px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.activity-item .el-button:hover {
+  background: #6366f1;
+  color: white;
+  transform: translateY(-1px);
 }
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .el-form {
-    padding: 16px;
+  .activity-hall {
+    padding: 24px 16px;
   }
-  
+
+  h2 {
+    font-size: 28px;
+    margin-bottom: 32px;
+  }
+
+  .el-form {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
   .el-select {
     width: 100%;
   }
-  
+
   .activity-list {
     grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .activity-item img {
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .el-form {
+    padding: 16px;
+  }
+
+  .el-form-item {
+    width: 100%;
+    margin-right: 0 !important;
   }
 }
 </style>
