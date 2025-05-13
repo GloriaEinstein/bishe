@@ -50,6 +50,7 @@
             <el-option label="老年人" value="老年人"></el-option>
             <el-option label="残障人士" value="残障人士"></el-option>
             <el-option label="贫困家庭" value="贫困家庭"></el-option>
+            <el-option label="特殊群体" value="特殊群体"></el-option>
             <el-option label="其它" value="其它"></el-option>
           </el-select>
         </el-form-item>

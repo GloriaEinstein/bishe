@@ -86,7 +86,17 @@
         <el-form-item label="用户名">
           <el-input v-model="userInfo.user.username" disabled />
         </el-form-item>
-        <el-form-item label="校组织名称">
+        <el-form-item label="组织名称">
+          <el-input v-model="userInfo.user.name" @blur="updateUser" />
+        </el-form-item>
+      </el-form>
+
+      <!-- 校外组织展示内容 -->
+      <el-form :model="userInfo" label-width="80px" v-if="userInfo.user.userType === 'offCampusOrganization'">
+        <el-form-item label="用户名">
+          <el-input v-model="userInfo.user.username" disabled />
+        </el-form-item>
+        <el-form-item label="组织名称">
           <el-input v-model="userInfo.user.name" @blur="updateUser" />
         </el-form-item>
       </el-form>

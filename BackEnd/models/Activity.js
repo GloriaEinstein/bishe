@@ -28,7 +28,7 @@ const activitySchema = new mongoose.Schema({
   },
   serviceTarget: {
     type: String,
-    enum: ['儿童', '妇女', '老年人', '残障人士', '贫困家庭', '其它']
+    enum: ['儿童', '妇女', '老年人', '残障人士', '贫困家庭', '特殊群体','其它']
   },
   participantCount: {
     type: Number
