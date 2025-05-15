@@ -101,3 +101,13 @@ export const getActivities = async (req, res) => {
     errorResponse(res, 500, '获取活动列表失败');
   }
 };
+
+export const getLatestActivities = async (req, res) => {
+  try {
+    const count = parseInt(req.params.count)
+    const activities = await Activity.find().sort({ createdAt: -1 }).limit(count)
+    successResponse(res, { activities }, '获取最新活动成功')
+  } catch (error) {
+    errorResponse(res, 500, '获取最新活动失败')
+  }
+}

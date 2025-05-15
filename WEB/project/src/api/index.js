@@ -7,8 +7,16 @@ const getAuthHeader = () => {
     Authorization: `Bearer ${token}`
   };
 };
+
 const activityApi = {
-  getList: (filters) => request.get('/activity/list', { params: filters })
+  getList: (filters) => request.get('/activity/list', { params: filters }),
+  publish: (data) => request.post('/activity/publish', data),
+  register: (activityId, data) => request.post(`/activity/${activityId}/register`, data),
+  getLatestActivities: (count) => request.get(`/activity/latest/${count}`)
+};
+
+const newsApi = {
+  getLatestNews: (count) => request.get(`/news/latest/${count}`)
 };
 
 export default {
@@ -43,12 +51,5 @@ export default {
     publish: (data) => request.post('/announcements/publish', data),
     getList: () => request.get('/announcements/list')
   },
-  news: {
-    publish: (data) => request.post('/news/publish', data),
-    getList: () => request.get('/news/list')
-  },
-  activity: {
-    publish: (data) => request.post('/activity/publish', data),
-    getList: () => request.get('/activity/list')
-  }
+  news: newsApi
 };

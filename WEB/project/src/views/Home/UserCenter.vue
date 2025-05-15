@@ -298,36 +298,154 @@ export default {
 </script>
 
 <style scoped>
-/* 保持原有样式不变 */
 .user-center {
-  padding: 20px;
-}
-
-.avatar-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-right: 20px;
-  border: 1px solid #ddd;
-}
-
-.logout {
-  text-align: center;
-  margin-top: 30px;
-}
-
-.el-textarea__inner {
-  min-height: 80px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 100vh;
 }
 
 .el-card {
-  max-width: 600px;
+  max-width: 680px;
   margin: 0 auto;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border: none;
+  transition: transform 0.3s ease;
+}
+
+.el-card:hover {
+  transform: translateY(-2px);
+}
+
+h2 {
+  text-align: center;
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 0;
+}
+
+.el-divider {
+  margin: 20px 0;
+  background-color: #e0e0e0;
+}
+
+/* 头像区域美化 */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 3px solid #fff;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 自定义输入框 */
+::v-deep .el-form-item__label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+::v-deep .el-input__inner {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 12px 16px;
+}
+
+::v-deep .el-input__inner:focus {
+  border-color: #5e72e4;
+  box-shadow: 0 2px 6px rgba(94, 114, 228, 0.2);
+}
+
+::v-deep .el-input.is-disabled .el-input__inner {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+/* 自定义选择框 */
+::v-deep .el-select .el-input__inner {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c757d"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+/* 文本域美化 */
+::v-deep .el-textarea__inner {
+  border-radius: 8px;
+  min-height: 100px;
+  padding: 12px 16px;
+  line-height: 1.6;
+}
+
+/* 按钮美化 */
+.el-button {
+  border-radius: 8px;
+  padding: 10px 24px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.el-button--primary {
+  background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
+  border: none;
+}
+
+.el-button--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(94, 114, 228, 0.3);
+}
+
+.el-button--danger {
+  background: linear-gradient(135deg, #f5365c 0%, #f56036 100%);
+  border: none;
+}
+
+/* 登出按钮 */
+.logout {
+  margin: 40px 0 20px;
+}
+
+/* 表单间距优化 */
+.el-form {
+  padding: 0 30px;
+}
+
+.el-form-item {
+  margin-bottom: 22px;
+}
+
+/* 学院选择动效 */
+::v-deep .el-select-dropdown__item {
+  padding: 10px 20px;
+  transition: all 0.2s ease;
+}
+
+::v-deep .el-select-dropdown__item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(4px);
+}
+
+/* 分割线动画 */
+.el-divider__text {
+  color: #6c757d;
+  font-size: 14px;
+  padding: 0 12px;
+  background-color: transparent;
 }
 </style>

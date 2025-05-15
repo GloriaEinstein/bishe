@@ -87,6 +87,11 @@ const router = new Router({
           path:'/report-management',
           name: 'ReportManagement',
           component: () => import('@/views/Home/ReportManagement'),
+        },
+        {
+          path: '/volunteer-home',
+          name: 'VolunteerHome',
+          component: () => import('@/views/Home/VolunteerHome')
         }
         
       ]

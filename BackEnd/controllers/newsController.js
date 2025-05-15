@@ -20,3 +20,13 @@ export const getNews = async (req, res) => {
     errorResponse(res, 500, '获取新闻列表失败');
   }
 };
+
+export const getLatestNews = async (req, res) => {
+  try {
+    const count = parseInt(req.params.count)
+    const news = await News.find().sort({ createdAt: -1 }).limit(count)
+    successResponse(res, { news }, '获取最新新闻成功')
+  } catch (error) {
+    errorResponse(res, 500, '获取最新新闻失败')
+  }
+}

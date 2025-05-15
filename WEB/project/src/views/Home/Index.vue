@@ -8,6 +8,10 @@
         @select="handleMenuSelect"
       >
         <!-- 志愿者菜单项 -->
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/volunteer-home">
+          <i class="el-icon-user"></i>
+          <span>志愿大厅</span>
+        </el-menu-item>
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/user-center">
           <i class="el-icon-user"></i>
           <span>用户中心</span>
@@ -155,20 +159,113 @@ export default {
 .home-container {
   height: 100vh;
   display: flex;
+  background: #f5f7fa;
 }
 
 .sidebar {
   width: 200px;
-  background: white;
-  border-right: 1px solid #d9d9d9;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fe 100%);
+  box-shadow: 4px 0 15px rgba(82, 95, 127, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logo {
-  height: 60px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 600;
+  color: #2c3e50;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #f8f9fe 0%, #ffffff 100%);
+  box-shadow: 0 2px 8px rgba(82, 95, 127, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #409eff 50%, transparent);
+}
+
+.el-menu {
+  border-right: none;
+  padding: 8px 12px;
+}
+
+.el-menu-item {
+  height: 48px;
+  line-height: 48px;
+  margin: 4px 0;
+  border-radius: 8px;
+  color: #5a5e66;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.el-menu-item:hover {
+  background: rgba(64, 158, 255, 0.08) !important;
+  color: #409eff !important;
+  transform: translateX(4px);
+}
+
+.el-menu-item.is-active {
+  background: rgba(64, 158, 255, 0.1) !important;
+  color: #409eff !important;
+  font-weight: 500;
+  position: relative;
+}
+
+.el-menu-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #409eff;
+  border-radius: 0 3px 3px 0;
+}
+
+.el-icon {
+  font-size: 18px;
+  margin-right: 8px;
+  vertical-align: text-bottom;
+}
+
+.el-main {
+  padding: 24px;
+  background: #f5f7fa;
+  position: relative;
+}
+
+.el-main::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #409eff, #79bbff, #a0cfff, #c6e2ff);
+  opacity: 0.12;
+}
+
+.el-badge {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.el-badge /deep/ .el-badge__content {
+  transform: scale(0.8);
+  box-shadow: 0 0 0 1px #fff;
 }
 </style>
