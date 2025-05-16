@@ -1,133 +1,272 @@
 <template>
-  <el-container class="home-container">
-    <el-aside width="200px" class="sidebar">
-      <div class="logo">志愿者管理平台</div>
-      <el-menu
-        :default-active="activeMenu"
-        router
-        @select="handleMenuSelect"
-      >
-        <el-menu-item index="/user-center">
-          <i class="el-icon-user"></i>
-          <span>用户中心</span>
-        </el-menu-item>
-        <el-menu-item index="/activity-hall">
-          <i class="el-icon-s-platform"></i>
-          <span>活动大厅</span>
-        </el-menu-item>
-        <el-menu-item index="/user-profile">
-          <i class="el-icon-s-custom"></i>
-          <span>用户画像</span>
-        </el-menu-item>
-        <el-menu-item index="/intelligent-recommendation">
-          <i class="el-icon-star-on"></i>
-          <span>智能推荐</span>
-        </el-menu-item>
-        <el-menu-item index="/system-notification">
-          <i class="el-icon-bell"></i>
-          <span>系统通知</span>
-          <!-- <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="ml-2"></el-badge> -->
-        </el-menu-item>
-        <el-menu-item index="/campus-news">
-          <i class="el-icon-news"></i>
-          <span>校园新闻</span>
-        </el-menu-item>
-        <el-menu-item index="/system-announcement">
-          <i class="el-icon-setting"></i>
-          <span>系统公告</span>
-        </el-menu-item>
-        <el-menu-item index="/activity-publish">
-          <i class="el-icon-circle-plus"></i>
-          <span>活动发布</span>
-        </el-menu-item>
-        <el-menu-item index="/user-review">
-          <i class="el-icon-check"></i>
-          <span>用户审核</span>
-        </el-menu-item>
-        <el-menu-item index="/notification-publish">
-          <i class="el-icon-edit"></i>
-          <span>通知发布</span>
-        </el-menu-item>
-      </el-menu>
-    </el-aside>
-
-    <el-container>
-      <el-main>
-        <router-view/>
-      </el-main>
-    </el-container>
-  </el-container>
+  <div class="activity-publish">
+    <el-card>
+      <h2>活动发布</h2>
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="form.title" />
+        </el-form-item>
+        <el-form-item label="简介">
+          <el-input
+            v-model="form.introduction"
+            type="textarea"
+            :autosize="{ minRows: 3, maxRows: 10 }"
+            class="auto-resize-textarea"
+            maxlength="15"
+          />
+        </el-form-item>
+        <el-form-item label="内容">
+          <el-input
+            v-model="form.content"
+            type="textarea"
+            :autosize="{ minRows: 3, maxRows: 10 }"
+            class="auto-resize-textarea"
+          />
+        </el-form-item>
+        <el-form-item label="活动区域">
+          <el-select v-model="form.activityArea" placeholder="请选择活动区域">
+            <el-option label="校内" value="校内"></el-option>
+            <el-option label="校外" value="校外"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="服务类别">
+          <el-select v-model="form.serviceType" placeholder="请选择服务类别">
+            <el-option label="社区服务" value="社区服务"></el-option>
+            <el-option label="支教助学" value="支教助学"></el-option>
+            <el-option label="扶贫减贫" value="扶贫减贫"></el-option>
+            <el-option label="卫生健康" value="卫生健康"></el-option>
+            <el-option label="环境保护" value="环境保护"></el-option>
+            <el-option label="文化艺术" value="文化艺术"></el-option>
+            <el-option label="禁毒宣传" value="禁毒宣传"></el-option>
+            <el-option label="关爱特殊群体" value="关爱特殊群体"></el-option>
+            <el-option label="大型活动" value="大型活动"></el-option>
+            <el-option label="其它" value="其它"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="服务对象">
+          <el-select v-model="form.serviceTarget" placeholder="请选择服务对象">
+            <el-option label="儿童" value="儿童"></el-option>
+            <el-option label="妇女" value="妇女"></el-option>
+            <el-option label="老年人" value="老年人"></el-option>
+            <el-option label="残障人士" value="残障人士"></el-option>
+            <el-option label="贫困家庭" value="贫困家庭"></el-option>
+            <el-option label="特殊群体" value="特殊群体"></el-option>
+            <el-option label="其它" value="其它"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="项目人数">
+          <el-input v-model.number="form.participantCount" type="number" />
+        </el-form-item>
+        <el-form-item label="活动开始时间">
+          <el-date-picker
+            v-model="form.startTime"
+            type="datetime"
+            placeholder="选择活动开始时间"
+            :picker-options="startTimePickerOptions"
+          />
+        </el-form-item>
+        <el-form-item label="活动结束时间">
+          <el-date-picker
+            v-model="form.endTime"
+            type="datetime"
+            placeholder="选择活动结束时间"
+            :picker-options="endTimePickerOptions"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handlePublish">发布</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+  </div>
 </template>
 
 <script>
 import api from '@/api'
 
 export default {
-  name: 'HomeLayout',
+  name: 'ActivityPublish',
   data() {
     return {
-      unreadCount: 0
-    }
-  },
-  computed: {
-    activeMenu() {
-      return this.$route.path
-    }
-  },
-  async mounted() {
-    try {
-      const { data } = await api.notification.getList();
-      const unreadNotifications = data.notifications.filter(notification => !notification.isRead);
-      this.unreadCount = unreadNotifications.length;
-    } catch (error) {
-      console.error('获取通知列表失败', error);
+      form: {
+        title: '',
+        introduction: '', // 新增简介字段
+        content: '',
+        activityArea: '',
+        serviceType: '',
+        serviceTarget: '',
+        participantCount: 0,
+        startTime: null,
+        endTime: null
+      },
+      rules: {
+        startTime: [
+          {
+            validator: (rule, value, callback) => {
+              if (value && new Date(value) < new Date()) {
+                callback(new Error('开始时间不能早于当前时间'));
+              } else {
+                callback();
+              }
+            },
+            trigger: 'change'
+          }
+        ],
+        endTime: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.form.startTime && value && new Date(value) < new Date(this.form.startTime)) {
+                callback(new Error('结束时间不能早于开始时间'));
+              } else {
+                callback();
+              }
+            },
+            trigger: 'change'
+          }
+        ]
+      },
+      startTimePickerOptions: {
+        disabledDate: (time) => {
+          return time.getTime() < Date.now() - 8.64e7;
+        }
+      },
+      endTimePickerOptions: {
+        disabledDate: (time) => {
+          if (this.form.startTime) {
+            return time.getTime() < new Date(this.form.startTime).getTime();
+          }
+          return false;
+        }
+      }
     }
   },
   methods: {
-    handleMenuSelect(index) {
-      this.$router.push(index);
+    async handlePublish() {
+      try {
+        await api.activity.publish(this.form);
+        this.$message.success('活动发布成功');
+        this.form.title = '';
+        this.form.introduction = ''; // 清空简介字段
+        this.form.content = '';
+        this.form.activityArea = '';
+        this.form.serviceType = '';
+        this.form.serviceTarget = '';
+        this.form.participantCount = 0;
+        this.form.startTime = null;
+        this.form.endTime = null;
+      } catch (error) {
+        this.$message.error('活动发布失败');
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.home-container {
-  height: 100vh;
+.activity-publish {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.el-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.el-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #303133;
+  font-size: 24px;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background-color: #409eff;
+  border-radius: 2px;
+}
+
+.el-form {
+  padding: 0 40px;
+}
+
+.el-form-item {
+  margin-bottom: 22px;
+}
+
+.el-form-item:last-child {
+  margin-top: 32px;
   display: flex;
+  justify-content: flex-end;
 }
 
-.sidebar {
-  width: 200px;
-  background: white;
-  border-right: 1px solid #d9d9d9;
+.el-input,
+.el-textarea {
+  border-radius: 8px;
 }
 
-.logo {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  background-color: rgba(24, 144, 255, 0.1);
+.el-input ::v-deep .el-input__inner,
+.el-textarea ::v-deep .el-textarea__inner {
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.el-main {
-  padding: 20px;
-  background-color: #f0f2f5;
+.el-input ::v-deep .el-input__inner:focus,
+.el-textarea ::v-deep .el-textarea__inner:focus {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
 }
 
-.el-menu {
-  border-right: none;
+.el-button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.el-menu-item {
-  height: 56px;
-  line-height: 56px;
+.el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
-.ml-2 {
-  margin-left: 8px;
+/* 内容栏弹性调整样式 */
+.auto-resize-textarea ::v-deep .el-textarea__inner {
+  min-height: 120px !important;
+  max-height: 400px;
+  height: auto !important;
+  resize: none;
+  line-height: 1.6;
+  padding: 12px 16px;
+  white-space: pre-wrap;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .el-form {
+    padding: 0 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .auto-resize-textarea ::v-deep .el-textarea__inner {
+    min-height: 100px;
+  }
 }
 </style>
