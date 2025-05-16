@@ -51,4 +51,14 @@ const activitySchema = new mongoose.Schema({
   },
 });
 
+activitySchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: (doc, ret) => {
+    ret.id = ret._id.toString(); // 将_id转换为字符串并重命名为id
+    delete ret._id;
+    return ret;
+  }
+});
+
 export default mongoose.model('Activity', activitySchema);

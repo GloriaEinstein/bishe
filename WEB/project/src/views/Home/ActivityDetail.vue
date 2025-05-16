@@ -1,199 +1,525 @@
 <template>
   <div class="activity-detail-page">
-    <!-- 整体分为左右两个盒子 -->
+    <!-- 自然装饰元素 -->
+    <div class="nature-deco leaf-top"></div>
+    <div class="nature-deco leaf-bottom"></div>
+    
     <div class="left-right-container">
-      <!-- 左盒子，宽度占比 7 -->
-      <div class="left-box">
-        <!-- 第一个盒子：活动封面、标题、服务类别 -->
+      <!-- 左侧内容区 -->
+      <div class="left-box forest-card">
+        <!-- 标题缎带 -->
+        <div class="title-ribbon">
+          <i class="el-icon-map-location ribbon-icon"></i>
+          <span class="ribbon-text">活动详情</span>
+        </div>
+
+        <!-- 封面和标题 -->
         <div class="box1">
           <img :src="getImageUrl(activity.serviceType)" alt="activity image" class="activity-image">
           <div class="title-section">
-            <h2>{{ activity.title }}</h2>
-            <p>{{ activity.serviceType }}</p>
+            <h2>{{ this.activity.title }}</h2>
+            <p class="service-type">{{ activity.serviceType }}</p>
           </div>
         </div>
-        <!-- 第二个盒子：项目地点、发布日期、项目日期、服务对象 -->
+
+        <!-- 基本信息 -->
         <div class="box2">
-          <p>项目地点：{{ activity.activityArea }}</p>
-          <p>发布日期：{{ formatDate(activity.createdAt) }}</p>
-          <p>项目日期：{{ formatDate(activity.startTime) }} - {{ formatDate(activity.endTime) }}</p>
-          <p>服务对象：{{ activity.serviceTarget }}</p>
+          <div class="info-item">
+            <i class="el-icon-location-outline"></i>
+            <span>项目地点：{{ activity.activityArea }}</span>
+          </div>
+          <div class="info-item">
+            <i class="el-icon-time"></i>
+            <span>发布日期：{{ formatDate(activity.createdAt) }}</span>
+          </div>
+          <div class="info-item">
+            <i class="el-icon-date"></i>
+            <span>项目日期：{{ formatDate(activity.startTime) }} - {{ formatDate(activity.endTime) }}</span>
+          </div>
+          <div class="info-item">
+            <i class="el-icon-user-solid"></i>
+            <span>服务对象：{{ activity.serviceTarget }}</span>
+          </div>
         </div>
-        <!-- 第三个盒子：项目详情、报名信息切换 -->
+
+        <!-- 详情/报名切换 -->
         <div class="box3">
           <el-tabs v-model="activeTab">
             <el-tab-pane label="项目详情" name="detail">
-              <p>{{ activity.content }}</p>
+              <div class="content-box">
+                <i class="el-icon-notebook-2 content-icon"></i>
+                <p>{{ activity.content }}</p>
+              </div>
             </el-tab-pane>
             <el-tab-pane label="报名信息" name="registration">
-              <ul>
-                <li v-for="user in registeredUsers" :key="user._id">{{ user.username }}</li>
-              </ul>
+              <div class="registration-list">
+                <div v-for="user in registeredUsers" :key="user._id" class="user-item">
+                  <i class="el-icon-user"></i>
+                  {{ user.username }}
+                </div>
+              </div>
             </el-tab-pane>
           </el-tabs>
         </div>
       </div>
-      <!-- 右盒子，宽度占比 3 -->
-      <div class="right-box">
-        <h2>项目发起人</h2>
-        <el-image :src="activity.publisher.avatar" fit="cover" class="avatar"></el-image>
-        <p>{{ activity.publisher.organizationName }}</p>
+
+      <!-- 右侧发起人信息 -->
+      <div class="right-box woodland-card">
+        <div class="organizer-frame">
+          <h2 class="organizer-title">
+            <i class="el-icon-office-building"></i>
+            项目发起人
+          </h2>
+          <el-image 
+            :src="activity.publisher.avatar" 
+            fit="cover" 
+            class="avatar wood-frame"
+          ></el-image>
+          <p class="organization-name">
+            <i class="el-icon-school"></i>
+            {{ activity.publisher.organizationName }}
+          </p>
+          <el-button 
+            class="forest-btn" 
+            @click="registerActivity(activity._id)" 
+            :disabled="isRegistered(activity)"
+          >
+            <i class="el-icon-thumb"></i>
+            立即报名
+          </el-button>
+          <el-button 
+          class="return-btn"
+          @click="goBackToHall"
+        >
+          <i class="el-icon-back"></i>
+          返回大厅
+        </el-button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import api from '@/api'
+
 export default {
+  name: 'ActivityDetail',
   data() {
     return {
       activity: {
-        coverImage: 'https://example.com/activity-cover.jpg',
-        title: '示例活动标题',
-        serviceType: '社区服务',
+        _id: '',
+        title: '',
+        serviceType: '大型活动',
         activityArea: '校内',
         createdAt: new Date(),
         startTime: new Date(),
         endTime: new Date(),
-        serviceTarget: '儿童',
-        content: '这是活动的详细内容...',
+        serviceTarget: '11',
+        content: '这里是',
         publisher: {
           avatar: 'https://example.com/publisher-avatar.jpg',
           organizationName: '示例组织名称'
-        }
+        },
+        registeredUsers: []
       },
-      registeredUsers: [
-        { _id: 1, username: '用户1' },
-        { _id: 2, username: '用户2' }
-      ],
+      registeredUsers: [],
       activeTab: 'detail'
-    };
+    }
   },
   methods: {
+    goBackToHall() {
+      this.$router.push('/activity-hall');
+    },
+    goToActivityDetail(activityId) {
+    // 确保activityId是字符串
+    this.$router.push(`/activity-detail/${activityId}`);
+    },
     getImageUrl(serviceType) {
-      return require(`@/assets/${serviceType}.png`);
+      return require(`@/assets/${serviceType}.png`)
     },
     formatDate(date) {
-      return new Date(date).toLocaleDateString();
+      return new Date(date).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
+    },
+    async registerActivity(activityId) {
+      try {
+        const userId = this.$store.state.user.userInfo._id
+        await api.activity.register(activityId, { userId })
+        this.$message.success('报名成功')
+        this.fetchActivityDetail(activityId)
+      } catch (error) {
+        this.$message.error('报名失败')
+      }
+    },
+    isRegistered(activity) {
+      const userId = this.$store.state.user.userInfo._id
+      return activity.registeredUsers.some(user => user._id === userId)
+    },
+    async fetchActivityDetail(activityId) {
+      try {
+        const { data } = await api.activity.getDetail(activityId);
+
+        this.activity.title = data.activity.title;
+        this.activity.serviceType = data.activity.serviceType;
+        this.activity.activityArea = data.activity.activityArea;
+        this.activity.createdAt = data.activity.createdAt;
+        this.activity.startTime = data.activity.startTime; 
+        this.activity.endTime = data.activity.endTime;
+        this.activity.serviceTarget = data.activity.serviceTarget;
+        this.activity.content = data.activity.content;
+
+        this.registeredUsers = data.activity.registeredUsers;
+      } catch (error) {
+        this.$message.error('获取活动详情失败');
+      }
     }
+  },
+  async mounted() {
+    const activityId = this.$route.params.activityId;
+  
+  // 添加ID有效性校验
+    if (!activityId || !/^[0-9a-fA-F]{24}$/.test(activityId)) {
+    this.$message.error('活动ID格式错误');
+    this.$router.push('/activity-hall');
+    return;
   }
-};
+
+    await this.fetchActivityDetail(activityId);
+  }
+}
 </script>
 
 <style scoped>
-.activity-detail-page {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+/* 森系主题变量 */
+:root {
+  --forest-dark: #2d5a27;
+  --forest-medium: #4a785e;
+  --forest-light: #8da67b;
+  --wood-color: #6b4f3a;
+  --parchment: #f5f5f5;
+  --leaf-light: #b3c99d;
 }
 
+.activity-detail-page {
+  padding: 40px 30px;
+  background: 
+    linear-gradient(160deg, #e9f3e1 0%, #d4e8cc 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      transparent 30px,
+      var(--leaf-light) 30px,
+      var(--leaf-light) 31px
+    );
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 自然装饰元素 */
+.nature-deco {
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.leaf-top {
+  top: -50px;
+  left: -30px;
+  width: 250px;
+  height: 400px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%232d5a27" d="M30,10 Q40,5 50,20 Q60,5 70,10 Q80,15 75,30 Q85,40 70,50 Q85,60 75,70 Q80,85 70,90 Q60,95 50,80 Q40,95 30,90 Q20,85 25,70 Q15,60 30,50 Q15,40 25,30 Q20,15 30,10"/></svg>');
+}
+
+.leaf-bottom {
+  right: -80px;
+  bottom: -50px;
+  width: 350px;
+  height: 500px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%234a785e" d="M70,90 Q60,85 55,75 Q50,85 40,80 Q30,75 35,65 Q25,55 40,50 Q25,45 35,35 Q30,25 40,20 Q50,15 55,25 Q60,15 70,20 Q80,25 75,35 Q85,45 70,50 Q85,55 75,65 Q80,75 70,90"/></svg>');
+}
+
+/* 主容器布局 */
 .left-right-container {
   display: flex;
-  gap: 20px;
+  gap: 30px;
+  position: relative;
+  z-index: 1;
 }
 
-.left-box {
+/* 左侧卡片样式 */
+.forest-card {
   flex: 7;
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: 
+    linear-gradient(to bottom right, #ffffff 0%, #f8fbf0 100%),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0px,
+      transparent 50px,
+      rgba(141,166,123,0.05) 50px,
+      rgba(141,166,123,0.05) 52px
+    );
+  border: 2px solid var(--forest-medium);
+  border-radius: 12px;
+  padding: 40px 30px;
+  box-shadow: 
+    0 8px 32px rgba(45,90,39,0.1),
+    inset 0 0 20px rgba(141,166,123,0.1);
+  position: relative;
+  overflow: hidden;
 }
 
-.right-box {
-  flex: 3;
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+.forest-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 65%,
+    rgba(141,166,123,0.1) 100%
+  );
 }
 
+/* 标题缎带 */
+.title-ribbon {
+  position: absolute;
+  top: -18px;
+  left: 30px;
+  background: var(--forest-dark);
+  padding: 8px 40px;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 12px rgba(45,90,39,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ribbon-icon {
+  color: #fff;
+  font-size: 24px;
+}
+
+.ribbon-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* 活动封面区域 */
 .box1 {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e5e5e5;
-  padding-bottom: 20px;
-}
-
-.cover-image {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-right: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 2px dashed var(--forest-medium);
 }
 
 .activity-image {
-  max-width: 100%; /* 确保图片不会超出容器宽度 */
-  max-height: 300px; /* 限制图片的最大高度 */
-  object-fit: cover; /* 保持图片比例并裁剪溢出部分 */
-  border-radius: 8px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  width: 280px;
+  height: 200px;
+  border-radius: 12px;
+  margin-right: 30px;
+  border: 3px solid white;
+  box-shadow: 
+    0 4px 12px rgba(45,90,39,0.15),
+    inset 0 0 8px rgba(45,90,39,0.1);
 }
 
 .title-section h2 {
-  font-size: 24px;
-  color: #333333;
+  font-size: 28px;
+  color: var(--forest-dark);
   margin: 0;
+  letter-spacing: 1px;
 }
 
-.title-section p {
+.service-type {
   font-size: 16px;
-  color: #666666;
-  margin-top: 8px;
+  color: var(--forest-medium);
+  background: rgba(141,166,123,0.1);
+  padding: 6px 15px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 12px;
 }
 
+/* 基本信息区 */
 .box2 {
-  margin-bottom: 20px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  background: rgba(141,166,123,0.08);
+  border: 1px solid rgba(141,166,123,0.2);
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 
+    0 2px 8px rgba(45,90,39,0.05),
+    inset 0 1px 2px rgba(255,255,255,0.3);
 }
 
-.box2 p {
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 15px 0;
   font-size: 16px;
-  color: #555555;
-  margin: 8px 0;
+  color: var(--wood-color);
 }
 
+.info-item i {
+  color: var(--forest-medium);
+  font-size: 18px;
+}
+
+/* 详情/报名切换 */
 .box3 {
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(141,166,123,0.2);
+  box-shadow: 0 2px 8px rgba(45,90,39,0.05);
+}
+
+.content-box {
   padding: 20px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 1.8;
+  color: var(--wood-color);
+  position: relative;
 }
 
-.el-tabs__header {
-  background-color: #f5f7fa;
-  border-bottom: 1px solid #e5e5e5;
+.content-icon {
+  position: absolute;
+  top: -12px;
+  left: -8px;
+  font-size: 40px;
+  color: rgba(141,166,123,0.3);
+  transform: rotate(-15deg);
 }
 
-.el-tab-pane {
-  padding: 10px 0;
+.registration-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  padding: 20px;
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.user-item {
+  background: rgba(141,166,123,0.08);
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--forest-medium);
 }
 
-.right-box h2 {
-  font-size: 20px;
-  color: #333333;
-  margin-bottom: 10px;
+/* 右侧发起人卡片 */
+.woodland-card {
+  flex: 3;
+  background: 
+    linear-gradient(to bottom right, #fff 0%, #f9f6f0 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      transparent 50px,
+      rgba(107,79,58,0.05) 50px,
+      rgba(107,79,58,0.05) 52px
+    );
+  border: 2px solid var(--wood-color);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 
+    0 8px 32px rgba(107,79,58,0.1),
+    inset 0 0 15px rgba(107,79,58,0.05);
 }
 
-.right-box p {
+.organizer-frame {
+  border: 1px solid rgba(107,79,58,0.2);
+  padding: 25px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.9);
+}
+
+.wood-frame {
+  border: 3px solid white;
+  box-shadow: 
+    0 4px 12px rgba(107,79,58,0.1),
+    inset 0 0 8px rgba(107,79,58,0.1);
+}
+
+.forest-btn {
+  background: linear-gradient(to bottom, #8da67b, #6b8c5e);
+  border: none;
+  color: white;
+  border-radius: 25px;
+  padding: 12px 35px;
   font-size: 16px;
-  color: #666666;
-  margin-top: 8px;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.forest-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(141,166,123,0.3);
+}
+
+.forest-btn:disabled {
+  background: linear-gradient(to bottom, #c2d1b8, #a8b89e);
+  cursor: not-allowed;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .left-right-container {
+    flex-direction: column;
+  }
+
+  .nature-deco {
+    display: none;
+  }
+
+  .forest-card,
+  .woodland-card {
+    margin: 0;
+    padding: 25px;
+  }
+
+  .activity-image {
+    width: 100%;
+    height: auto;
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .box1 {
+    flex-direction: column;
+  }
+  .return-btn {
+      width: 100%;
+      margin-top: 15px;
+      background: linear-gradient(to bottom, #9e9e9e, #757575);
+      border: none;
+      color: white;
+      border-radius: 25px;
+      padding: 12px 35px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .return-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(158,158,158,0.3);
+    }
+
+    .return-btn i {
+      margin-right: 8px;
+    }
+    
 }
 </style>

@@ -73,9 +73,9 @@
           <span>{{ (activity.registeredUsers.length / activity.participantCount) * 100 }}%</span>
           <span>距离结束时间: {{ getTimeLeft(activity.endTime) }}</span>
         </div>
-        <el-button @click="registerActivity(activity._id)" :disabled="isRegistered(activity)">报名</el-button>
+        <!-- 移除报名按钮 -->
       </div>
-    </div>
+      </div>
   </div>
 </template>
 

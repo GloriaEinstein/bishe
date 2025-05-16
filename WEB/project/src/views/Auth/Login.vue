@@ -93,33 +93,33 @@ export default {
     },
 
     async handleSubmit() {
-    try {
-      this.loading = true;
-      await this.$refs.form.validate();
-      
-      const action = this.isLogin ? 'login' : 'register';
-      const response = await this[action](this.form);
-      
-      if (action === 'register') {
-        // 检查后端返回的消息
-        const message = response.message || (response.data && response.data.message);
-        if (message === '注册申请已提交，请等待管理员审核') {
-          this.$message.success('注册申请已提交，请等待管理员审核');
+      try {
+        this.loading = true;
+        await this.$refs.form.validate();
+
+        const action = this.isLogin ? 'login' : 'register';
+        const response = await this[action](this.form);
+
+        if (action === 'register') {
+          // 检查后端返回的消息
+          const message = response.message || (response.data && response.data.message);
+          if (message === '注册申请已提交，请等待管理员审核') {
+            this.$message.success('注册申请已提交，请等待管理员审核');
+          } else {
+            this.$message.success('注册成功！');
+          }
+          this.$router.push(this.$route.query.redirect || '/');
         } else {
-          this.$message.success('注册成功！');
+          this.$message.success('登录成功！');
+          this.$router.push(this.$route.query.redirect || '/');
         }
-        this.$router.push(this.$route.query.redirect || '/');
-      } else {
-        this.$message.success('登录成功！');
-        this.$router.push(this.$route.query.redirect || '/');
+      } catch (error) {
+        // 处理错误
+        this.$message.error('操作失败，请稍后重试');
+      } finally {
+        this.loading = false;
       }
-    } catch (error) {
-      // 处理错误
-      this.$message.error('操作失败，请稍后重试');
-    } finally {
-      this.loading = false;
     }
-  }
   },
 };
 </script>

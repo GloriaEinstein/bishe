@@ -29,10 +29,10 @@ const router = new Router({
           component: () => import('@/views/Home/ActivityHall')
         },
         {
-          path: '/activity-detail/:id',
+          path: '/activity-detail/:activityId',
           name: 'ActivityDetail',
           component: () => import('@/views/Home/ActivityDetail'),
-  },
+        },
         {
           path: '/user-profile',
           name: 'UserProfile',

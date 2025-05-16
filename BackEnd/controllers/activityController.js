@@ -111,3 +111,18 @@ export const getLatestActivities = async (req, res) => {
     errorResponse(res, 500, '获取最新活动失败')
   }
 }
+
+export const getActivityDetail = async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.activityId)
+      .populate('registeredUsers', 'username');
+      
+    if (!activity) {
+      return errorResponse(res, 404, '活动未找到');
+    }
+    
+    successResponse(res, { activity }, '获取活动详情成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取活动详情失败');
+  }
+};

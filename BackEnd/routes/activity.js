@@ -1,5 +1,5 @@
 import express from 'express';
-import { createActivity, getActivities, registerActivity, getLatestActivities } from '../controllers/activityController.js';
+import { createActivity, getActivities, registerActivity, getLatestActivities, getActivityDetail } from '../controllers/activityController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -15,5 +15,8 @@ router.post('/:activityId/register', authMiddleware, registerActivity);
 
 // 获取最新活动接口
 router.get('/latest/:count', authMiddleware, getLatestActivities);
+
+// 获取活动详情接口
+router.get('/:activityId', authMiddleware, getActivityDetail);
 
 export default router;
