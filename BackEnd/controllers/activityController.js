@@ -3,7 +3,7 @@ import Activity from '../models/Activity.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 export const createActivity = async (req, res) => {
-  console.log('Received request body:', req.body); // 添加日志
+  console.log('Received request body:', req.body); 
   try {
     const { 
       title, 
@@ -25,6 +25,10 @@ export const createActivity = async (req, res) => {
     } else {
       projectStatus = '运行中';
     }
+
+    // 获取发布活动用户的username
+    const pubUser = req.user.username; 
+
     const activity = await Activity.create({ 
       title, 
       introduction, 
@@ -35,11 +39,12 @@ export const createActivity = async (req, res) => {
       serviceTarget, 
       participantCount,
       startTime,
-      endTime
+      endTime,
+      pubUser
     });
     successResponse(res, { activity }, '活动发布成功');
   } catch (error) {
-    console.error('Error creating activity:', error); // 添加错误日志
+    console.error('Error creating activity:', error); 
     errorResponse(res, 500, '活动发布失败');
   }
 };
@@ -125,4 +130,7 @@ export const getActivityDetail = async (req, res) => {
   } catch (error) {
     errorResponse(res, 500, '获取活动详情失败');
   }
+};
+
+export const getActivitiesByPubUser = async (req, res) => {
 };

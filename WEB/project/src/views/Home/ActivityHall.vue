@@ -62,7 +62,7 @@
         v-for="activity in activities" 
         :key="activity._id"
         class="activity-item"
-        @click="goToActivityDetail(activity._id)"
+        @click="goToActivityDetail(activity.id)"
       >
         <img :src="getImageUrl(activity.serviceType)" alt="activity image">
         <h3>{{ activity.title }}</h3>
@@ -127,6 +127,8 @@ export default {
       return activity.registeredUsers.includes(userId);
     },
     goToActivityDetail(activityId) {
+      console.log(activityId);
+      
       this.$router.push(`/activity-detail/${activityId}`);
     },
     formatDate(date) {

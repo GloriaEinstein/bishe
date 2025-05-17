@@ -1,7 +1,18 @@
 // bishe10/BackEnd/models/Activity.js
 import mongoose from 'mongoose';
 
+const CounterSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  seq: { type: Number, default: 0 }
+});
+
+const Counter = mongoose.model('Counter', CounterSchema);
+
 const activitySchema = new mongoose.Schema({
+  aID: {
+    type: Number,
+    unique: true
+  },
   title: {
     type: String,
     required: [true, '活动标题不能为空'],
@@ -49,6 +60,24 @@ const activitySchema = new mongoose.Schema({
   endTime: {
     type: Date,
   },
+  pubUser: {
+    type: String,
+    required: [true, '发布活动的用户姓名不能为空']
+  }
+});
+
+activitySchema.pre('save', async function(next) {
+  try {
+    const counter = await Counter.findOneAndUpdate(
+      { _id: 'activity_aID' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.aID = counter.seq;
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 activitySchema.set('toJSON', {

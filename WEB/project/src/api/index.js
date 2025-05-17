@@ -14,6 +14,7 @@ const activityApi = {
   register: (activityId, data) => request.post(`/activity/${activityId}/register`, data),
   getLatestActivities: (count) => request.get(`/activity/latest/${count}`),
   getDetail: (activityId) => request.get(`/activity/${activityId}`),
+  getActivitiesByPublisher: (username) => request.get(`/activity/by-publisher/${username}`),
 };
 
 const newsApi = {

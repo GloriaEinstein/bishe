@@ -81,7 +81,7 @@
           </p>
           <el-button 
             class="forest-btn" 
-            @click="registerActivity(activity._id)" 
+            @click="registerActivity(activityId)" 
             :disabled="isRegistered(activity)"
           >
             <i class="el-icon-thumb"></i>
@@ -110,21 +110,22 @@ export default {
       activity: {
         _id: '',
         title: '',
-        serviceType: '大型活动',
-        activityArea: '校内',
-        createdAt: new Date(),
-        startTime: new Date(),
-        endTime: new Date(),
-        serviceTarget: '11',
-        content: '这里是',
+        serviceType: '',
+        activityArea: '',
+        createdAt: '',
+        startTime: '',
+        endTime: '',
+        serviceTarget: '',
+        content: '',
         publisher: {
-          avatar: 'https://example.com/publisher-avatar.jpg',
-          organizationName: '示例组织名称'
+          avatar: '',
+          organizationName: ''
         },
         registeredUsers: []
       },
       registeredUsers: [],
-      activeTab: 'detail'
+      activeTab: 'detail',
+      pubUser:''
     }
   },
   methods: {
@@ -162,6 +163,7 @@ export default {
     async fetchActivityDetail(activityId) {
       try {
         const { data } = await api.activity.getDetail(activityId);
+        const pubUser = data.activity.pubUser;
 
         this.activity.title = data.activity.title;
         this.activity.serviceType = data.activity.serviceType;
@@ -171,12 +173,39 @@ export default {
         this.activity.endTime = data.activity.endTime;
         this.activity.serviceTarget = data.activity.serviceTarget;
         this.activity.content = data.activity.content;
-
         this.registeredUsers = data.activity.registeredUsers;
+
+        
+        await this.fetchActivitiesPubUser(pubUser);
+
       } catch (error) {
         this.$message.error('获取活动详情失败');
+        throw error; 
       }
-    }
+    },
+    async fetchActivitiesPubUser(pubUser) {
+          if (!pubUser) {
+        this.error = '缺少发布者信息';
+        return;
+      }
+      
+      this.loading = true;
+      try {
+        const response = await ActivityService.getActivitiesByPubUser(pubUser);
+        this.publisherActivities = response.data.activities; // 保存获取的活动列表
+        console.log('发布者的其他活动:', this.publisherActivities);
+      } catch (error) {
+        this.error = error.response.data.message || '获取活动列表失败';
+        console.error('Error fetching activities:', error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    formatDate(dateString) {
+      if (!dateString) return '未知';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+    },
   },
   async mounted() {
     const activityId = this.$route.params.activityId;
@@ -189,6 +218,7 @@ export default {
   }
 
     await this.fetchActivityDetail(activityId);
+
   }
 }
 </script>
