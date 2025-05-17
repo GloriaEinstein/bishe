@@ -53,9 +53,14 @@
             </el-tab-pane>
             <el-tab-pane label="报名信息" name="registration">
               <div class="registration-list">
-                <div v-for="user in registeredUsers" :key="user._id" class="user-item">
+                <div 
+                  v-for="user in registeredUsers" 
+                  :key="user._id" 
+                  class="user-item"
+                >
                   <i class="el-icon-user"></i>
-                  {{ user.username }}
+                  <span class="user-name">{{ user.name }}</span>
+                  <span class="college-tooltip">{{ user.college }}</span>
                 </div>
               </div>
             </el-tab-pane>
@@ -94,6 +99,9 @@
           <i class="el-icon-back"></i>
           返回大厅
         </el-button>
+        <!-- <el-button @click="nod">
+          11
+        </el-button> -->
         </div>
       </div>
     </div>
@@ -117,7 +125,7 @@ export default {
         endTime: '',
         serviceTarget: '',
         content: '',
-        avatar: '../assets/default-avatar.png',
+        avatar: '@/assets/default-avatar.png',
         organizationName: '',
         registeredUsers: []
       },
@@ -127,6 +135,9 @@ export default {
     }
   },
   methods: {
+    nod() {
+      console.log('this.registeredUsers', this.registeredUsers)
+    },
     goBackToHall() {
       this.$router.push('/activity-hall');
     },
@@ -162,7 +173,6 @@ export default {
     async fetchActivityDetail(activityId) {
       try {
         const { data } = await api.activity.getDetail(activityId);
-        const pubUser = data.activity.pubUser;
 
         this.activity.title = data.activity.title;
         this.activity.serviceType = data.activity.serviceType;
@@ -203,7 +213,48 @@ export default {
 </script>
 
 <style scoped>
-/* 森系主题变量 */
+.user-item {
+  position: relative;
+}
+
+.college-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.user-item:hover .college-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.user-item::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent rgba(0, 0, 0, 0.7);
+  display: none;
+}
+
+.user-item:hover::after {
+  display: block;
+}
+
 :root {
   --forest-dark: #2d5a27;
   --forest-medium: #4a785e;

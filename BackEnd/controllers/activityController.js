@@ -124,7 +124,8 @@ export const getLatestActivities = async (req, res) => {
 export const getActivityDetail = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.activityId)
-      .populate('registeredUsers', 'username');
+      // 新增：populate 报名用户的 name, username, college 字段
+      .populate('registeredUsers', 'name username college'); 
       
     if (!activity) {
       return errorResponse(res, 404, '活动未找到');
@@ -139,7 +140,9 @@ export const getActivityDetail = async (req, res) => {
 export const getRegisteredUsers = async (req, res) => {
   try {
     const { activityId } = req.params;
-    const activity = await Activity.findById(activityId).populate('registeredUsers', 'username');
+    const activity = await Activity.findById(activityId)
+      // 新增：populate 报名用户的 name, username, college 字段
+      .populate('registeredUsers', 'name username college'); 
     if (!activity) {
       return errorResponse(res, 404, '活动未找到');
     }
