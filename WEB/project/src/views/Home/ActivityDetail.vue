@@ -71,22 +71,22 @@
             项目发起人
           </h2>
           <el-image 
-            :src="activity.publisher.avatar" 
+            :src="activity.avatar" 
             fit="cover" 
             class="avatar wood-frame"
           ></el-image>
           <p class="organization-name">
             <i class="el-icon-school"></i>
-            {{ activity.publisher.organizationName }}
+            {{ activity.organizationName }}
           </p>
           <el-button 
-            class="forest-btn" 
-            @click="registerActivity(activityId)" 
-            :disabled="isRegistered(activity)"
-          >
-            <i class="el-icon-thumb"></i>
-            立即报名
-          </el-button>
+              class="forest-btn" 
+              @click="registerActivity(activityId)" 
+              :disabled="isRegistered(activity)"
+            >
+              <i class="el-icon-thumb"></i>
+              {{ isRegistered(activity) ? '已报名' : '立即报名' }}
+            </el-button>
           <el-button 
           class="return-btn"
           @click="goBackToHall"
@@ -117,15 +117,13 @@ export default {
         endTime: '',
         serviceTarget: '',
         content: '',
-        publisher: {
-          avatar: '',
-          organizationName: ''
-        },
+        avatar: '../assets/default-avatar.png',
+        organizationName: '',
         registeredUsers: []
       },
       registeredUsers: [],
       activeTab: 'detail',
-      pubUser:''
+      activityId:''
     }
   },
   methods: {
@@ -148,17 +146,18 @@ export default {
     },
     async registerActivity(activityId) {
       try {
-        const userId = this.$store.state.user.userInfo._id
-        await api.activity.register(activityId, { userId })
-        this.$message.success('报名成功')
-        this.fetchActivityDetail(activityId)
+        const userId = this.$store.state.user.userInfo.user._id;
+
+        await api.activity.register(activityId, { userId });
+        this.$message.success('报名成功');
+        this.fetchActivityDetail(activityId);
       } catch (error) {
-        this.$message.error('报名失败')
+        this.$message.error('报名失败');
       }
     },
     isRegistered(activity) {
-      const userId = this.$store.state.user.userInfo._id
-      return activity.registeredUsers.some(user => user._id === userId)
+      const userId = this.$store.state.user.userInfo.user._id;
+      return activity.registeredUsers.some(user => user.id === userId);
     },
     async fetchActivityDetail(activityId) {
       try {
@@ -174,31 +173,11 @@ export default {
         this.activity.serviceTarget = data.activity.serviceTarget;
         this.activity.content = data.activity.content;
         this.registeredUsers = data.activity.registeredUsers;
-
-        
-        await this.fetchActivitiesPubUser(pubUser);
+        this.activity.organizationName = data.activity.name;
 
       } catch (error) {
         this.$message.error('获取活动详情失败');
         throw error; 
-      }
-    },
-    async fetchActivitiesPubUser(pubUser) {
-          if (!pubUser) {
-        this.error = '缺少发布者信息';
-        return;
-      }
-      
-      this.loading = true;
-      try {
-        const response = await ActivityService.getActivitiesByPubUser(pubUser);
-        this.publisherActivities = response.data.activities; // 保存获取的活动列表
-        console.log('发布者的其他活动:', this.publisherActivities);
-      } catch (error) {
-        this.error = error.response.data.message || '获取活动列表失败';
-        console.error('Error fetching activities:', error);
-      } finally {
-        this.loading = false;
       }
     },
     formatDate(dateString) {
@@ -209,6 +188,7 @@ export default {
   },
   async mounted() {
     const activityId = this.$route.params.activityId;
+    this.activityId = activityId;
   
   // 添加ID有效性校验
     if (!activityId || !/^[0-9a-fA-F]{24}$/.test(activityId)) {
@@ -218,7 +198,6 @@ export default {
   }
 
     await this.fetchActivityDetail(activityId);
-
   }
 }
 </script>

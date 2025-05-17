@@ -14,7 +14,7 @@ const activityApi = {
   register: (activityId, data) => request.post(`/activity/${activityId}/register`, data),
   getLatestActivities: (count) => request.get(`/activity/latest/${count}`),
   getDetail: (activityId) => request.get(`/activity/${activityId}`),
-  getActivitiesByPublisher: (username) => request.get(`/activity/by-publisher/${username}`),
+  getRegisteredUsers: (activityId) => request.get(`/activity/${activityId}/registered-users`)
 };
 
 const newsApi = {
@@ -41,7 +41,8 @@ export default {
       });
     },
     getUnverifiedUsers: () => request.get('/users/unverified'),
-    verifyUser: (userId) => request.put(`/users/verify/${userId}`)
+    verifyUser: (userId) => request.put(`/users/verify/${userId}`),
+    getUserByUsername: (username) => request.get(`/user/by-username/${username}`)
   },
   notification: {
     publish: (data) => request.post('/notifications/publish', data),

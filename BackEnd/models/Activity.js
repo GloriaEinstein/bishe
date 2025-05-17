@@ -60,10 +60,18 @@ const activitySchema = new mongoose.Schema({
   endTime: {
     type: Date,
   },
-  pubUser: {
+  username: {
     type: String,
     required: [true, '发布活动的用户姓名不能为空']
-  }
+  },
+  name: {
+    type: String,
+    required: [true, '发布活动的用户姓名不能为空']
+  },
+  avatar: {
+    type: String,
+    required: [true, '发布活动的用户头像不能为空']
+  },
 });
 
 activitySchema.pre('save', async function(next) {

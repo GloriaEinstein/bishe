@@ -27,7 +27,9 @@ export const createActivity = async (req, res) => {
     }
 
     // 获取发布活动用户的username
-    const pubUser = req.user.username; 
+    const username = req.user.username; 
+    const name = req.user.name;
+    const avatar = req.user.avatar;
 
     const activity = await Activity.create({ 
       title, 
@@ -40,7 +42,9 @@ export const createActivity = async (req, res) => {
       participantCount,
       startTime,
       endTime,
-      pubUser
+      username,
+      name,
+      avatar
     });
     successResponse(res, { activity }, '活动发布成功');
   } catch (error) {
@@ -132,5 +136,15 @@ export const getActivityDetail = async (req, res) => {
   }
 };
 
-export const getActivitiesByPubUser = async (req, res) => {
+export const getRegisteredUsers = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const activity = await Activity.findById(activityId).populate('registeredUsers', 'username');
+    if (!activity) {
+      return errorResponse(res, 404, '活动未找到');
+    }
+    successResponse(res, { registeredUsers: activity.registeredUsers }, '获取已报名人员列表成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取已报名人员列表失败');
+  }
 };
