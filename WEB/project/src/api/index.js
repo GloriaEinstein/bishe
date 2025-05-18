@@ -35,7 +35,6 @@ export default {
       formData.append('avatar', file);
       return request.post('/users/uploadAvatar', formData, {
         headers: {
-          ...getAuthHeader(),
           'Content-Type': 'multipart/form-data'
         }
       });
@@ -54,5 +53,10 @@ export default {
     publish: (data) => request.post('/announcements/publish', data),
     getList: () => request.get('/announcements/list')
   },
-  news: newsApi
+  news: newsApi,
+  comment: {
+    getComments: (activityId) => request.get(`/comments/${activityId}`),
+    postComment: (activityId, content) => request.post(`/comments/${activityId}`, { content }),
+    reportComment: (commentId) => request.post(`/comments/report/${commentId}`) // 路径对应新路由
+  },
 };

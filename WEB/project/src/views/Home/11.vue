@@ -17,9 +17,8 @@
         <div class="box1">
           <img :src="getImageUrl(activity.serviceType)" alt="activity image" class="activity-image">
           <div class="title-section">
-            <h2>{{ activity.title }}</h2>
+            <h2>{{ this.activity.title }}</h2>
             <p class="service-type">{{ activity.serviceType }}</p>
-            <p class="introduction">{{ activity.introduction }}</p> <!-- 新增简介展示 -->
           </div>
         </div>
 
@@ -51,7 +50,7 @@
           </div>
         </div>
 
-        <!-- 详情/报名切换 -->
+        <!-- 详情/报名/评论切换 -->
         <div class="box3">
           <el-tabs v-model="activeTab">
             <el-tab-pane label="项目详情" name="detail">
@@ -68,6 +67,24 @@
                 </div>
                 <div v-if="registeredUsers.length === 0" class="empty-tip">
                   暂无报名人员
+                </div>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="评论区" name="comments">
+              <div class="comment-section">
+                <el-form :model="commentForm" @submit.prevent="submitComment">
+                  <el-form-item>
+                    <el-input v-model="commentForm.content" type="textarea" placeholder="发表评论"></el-input>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="submitComment">发表</el-button>
+                  </el-form-item>
+                </el-form>
+                <div v-for="comment in comments" :key="comment._id" class="comment-item">
+                  <el-image :src="comment.user.avatar" fit="cover" class="avatar"></el-image>
+                  <span class="user-name">{{ comment.user.name }}</span>
+                  <p class="comment-content">{{ comment.content }}</p>
+                  <el-button type="danger" size="mini" @click="reportComment(comment._id)">举报</el-button>
                 </div>
               </div>
             </el-tab-pane>
@@ -115,7 +132,7 @@ export default {
       activity: {
         _id: '',
         title: '',
-        introduction: '', // 新增简介字段
+        introduction: '',
         serviceType: '',
         activityArea: '',
         createdAt: '',
@@ -132,50 +149,72 @@ export default {
         registeredUsers: []
       },
       registeredUsers: [],
-      activeTab: 'detail'
-    }
-  },
-  methods: {
-    getImageUrl(serviceType) {
-      return require(`@/assets/${serviceType}.png`)
-    },
-    formatDate(date) {
-      return new Date(date).toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    },
-    async registerActivity(activityId) {
-      try {
-        const userId = this.$store.state.user.userInfo._id
-        await api.activity.register(activityId, { userId })
-        this.$message.success('报名成功')
-        this.fetchActivityDetail(activityId)
-      } catch (error) {
-        this.$message.error(error.response?.data?.message || '报名失败')
-      }
-    },
-    isRegistered(activity) {
-      const userId = this.$store.state.user.userInfo._id
-      return activity.registeredUsers.some(user => user._id === userId)
-    },
-    async fetchActivityDetail(activityId) {
-      try {
-        const { data } = await api.activity.getDetail(activityId)
-        this.activity = data.activity
-        this.registeredUsers = data.activity.registeredUsers
-      } catch (error) {
-        this.$message.error('获取活动详情失败')
-        this.$router.push('/activity-hall')
-      }
+      activeTab: 'detail',
+      commentForm: {
+        content: ''
+      },
+      comments: []
     }
   },
   async mounted() {
-    const activityId = this.$route.params.activityId
-    this.fetchActivityDetail(activityId)
+    try {
+      const activityId = this.$route.params.id;
+      const { data } = await api.activity.getActivityDetail(activityId);
+      this.activity = data.activity;
+      this.registeredUsers = data.registeredUsers;
+      const commentsResponse = await api.comment.getComments(activityId);
+      this.comments = commentsResponse.data.comments;
+    } catch (error) {
+      console.error('获取活动详情失败', error);
+    }
+  },
+  methods: {
+    async submitComment() {
+      try {
+        const activityId = this.$route.params.id;
+        const response = await api.comment.postComment(activityId, this.commentForm.content);
+        this.comments.push(response.data.comment);
+        this.commentForm.content = '';
+      } catch (error) {
+        console.error('发表评论失败', error);
+      }
+    },
+    async reportComment(commentId) {
+      try {
+        await api.comment.reportComment(commentId);
+        this.$message.success('举报成功，等待管理员审核');
+      } catch (error) {
+        console.error('举报评论失败', error);
+      }
+    }
   }
 }
 </script>
+
+<style scoped>
+.comment-section {
+  padding: 20px;
+}
+
+.comment-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user-name {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.comment-content {
+  flex-grow: 1;
+}
+</style>

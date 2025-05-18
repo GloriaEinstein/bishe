@@ -9,7 +9,9 @@ import userRouter from './routes/user.js'
 import notificationRouter from './routes/notification.js';
 import announcementRoutes from './routes/announcement.js';
 import newsRoutes from './routes/news.js';
+import commentRoutes from './routes/comment.js';
 import activityRoutes from './routes/activity.js';
+
 import { errorHandler } from './middlewares/authMiddleware.js'
 
 const app = express()
@@ -46,6 +48,7 @@ app.use('/api/notifications', notificationRouter);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/comments', commentRoutes);
 
 // 错误处理
 app.use(errorHandler)
