@@ -6,44 +6,159 @@
         <el-form-item label="标题">
           <el-input v-model="form.title" />
         </el-form-item>
+        <el-form-item label="封面图片">
+          <el-upload
+            class="upload-demo"
+            action="#"
+            :before-upload="beforeUpload"
+            :on-success="handleUploadSuccess"
+            :show-file-list="false"
+          >
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过5MB</div>
+          </el-upload>
+          <img v-if="form.coverImage" :src="form.coverImage" alt="封面图片" style="max-width: 200px; margin-top: 10px;">
+        </el-form-item>
+        <el-form-item label="分类">
+          <el-select v-model="form.category" placeholder="请选择新闻分类">
+            <el-option label="校园动态" value="校园动态"></el-option>
+            <el-option label="学术科研" value="学术科研"></el-option>
+            <el-option label="文体活动" value="文体活动"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标签">
+          <el-input v-model="form.tags" placeholder="多个标签用逗号分隔"></el-input>
+        </el-form-item>
         <el-form-item label="内容">
-          <el-input
+          <!-- 使用vue-quill-editor替代@vueup/vue-quill -->
+          <quill-editor
             v-model="form.content"
-            type="textarea"
-            :autosize="{ minRows: 3, maxRows: 10 }"
-            class="auto-resize-textarea"
-          />
+            ref="editor"
+            :options="editorOption"
+          ></quill-editor>
+        </el-form-item>
+        <el-form-item label="发布时间">
+          <el-date-picker
+            v-model="form.publishTime"
+            type="datetime"
+            placeholder="选择发布时间"
+          ></el-date-picker>
         </el-form-item>
         <el-form-item>
+          <el-button type="primary" @click="handlePreview">预览</el-button>
           <el-button type="primary" @click="handlePublish">发布</el-button>
         </el-form-item>
       </el-form>
     </el-card>
+
+    <!-- 预览弹窗 -->
+    <el-dialog :visible.sync="previewVisible" title="新闻预览">
+      <template #content>
+        <div>
+          <h3>{{ form.title }}</h3>
+          <img v-if="form.coverImage" :src="form.coverImage" alt="封面图片" style="max-width: 100%; margin-bottom: 20px;">
+          <p>分类：{{ form.category }}</p>
+          <p>标签：{{ form.tags }}</p>
+          <div v-html="form.content"></div>
+          <p>发布时间：{{ form.publishTime }}</p>
+        </div>
+      </template>
+      <template #footer>
+        <el-button @click="previewVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import api from '@/api'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+// 引入vue-quill-editor替代@vueup/vue-quill
+import { quillEditor } from 'vue-quill-editor'
 
 export default {
   name: 'NewsPublish',
+  components: {
+    // 注册组件
+    quillEditor
+  },
   data() {
     return {
       form: {
         title: '',
-        content: ''
+        coverImage: '',
+        category: '',
+        tags: '',
+        content: '',
+        publishTime: null
+      },
+      previewVisible: false,
+      editorOption: {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ 'header': 1 }, { 'header': 2 }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'script': 'sub' }, { 'script': 'super' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            ['clean'],
+            ['link', 'image', 'video']
+          ]
+        }
       }
     }
   },
   methods: {
     async handlePublish() {
       try {
-        await api.news.publish(this.form);
-        this.$message.success('新闻发布成功');
-        this.form.title = '';
-        this.form.content = '';
+        // 处理发布时间，如果用户未选择，则默认立即发布
+        if (!this.form.publishTime) {
+          this.form.publishTime = new Date()
+        }
+        await api.news.publish(this.form)
+        this.$message.success('新闻发布成功')
+        this.resetForm()
       } catch (error) {
-        this.$message.error('新闻发布失败');
+        this.$message.error('新闻发布失败')
+      }
+    },
+    handlePreview() {
+      this.previewVisible = true
+    },
+    beforeUpload(file) {
+      const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
+      const isLt5M = file.size / 1024 / 1024 < 5
+      if (!isJPG) {
+        this.$message.error('只能上传jpg/png文件')
+      }
+      if (!isLt5M) {
+        this.$message.error('图片大小不能超过5MB')
+      }
+      return isJPG && isLt5M
+    },
+    handleUploadSuccess(response, file, fileList) {
+      // 这里假设后端返回的图片URL在response.data.url中
+      this.form.coverImage = response.data.url
+      this.$message.success('封面图片上传成功')
+    },
+    resetForm() {
+      this.form = {
+        title: '',
+        coverImage: '',
+        category: '',
+        tags: '',
+        content: '',
+        publishTime: null
       }
     }
   }
