@@ -9,27 +9,55 @@ const __dirname = path.dirname(__filename);
 
 export const createNews = async (req, res) => {
   try {
-    const { title, content, category, tags } = req.body;
-    let coverImage = '';
-    
-    if (req.file) {
-      // 构建可访问的URL路径
-      coverImage = `/uploads/${req.file.filename}`;
+    // 检查是否有上传文件
+    if (!req.file) {
+      return res.status(400).json({ 
+        code: 400, 
+        success: false, 
+        message: '请上传封面图片' 
+      });
     }
     
-    const news = await News.create({ 
-      title, 
-      content, 
-      coverImage, 
-      category, 
-      tags,
-      createdAt: new Date()
-    });
+    // 构建新闻数据
+    const newsData = {
+      title: req.body.title,
+      content: req.body.content,
+      category: req.body.category,
+      tags: req.body.tags,
+      publishTime: req.body.publishTime || new Date(),
+      // 构建文件URL，假设public目录是静态资源目录
+      coverImage: `/uploads/news/${req.file.filename}`
+    };
     
-    successResponse(res, { news }, '新闻发布成功');
+    // 创建新闻
+    const newNews = new News(newsData);
+    await newNews.save();
+    
+    res.status(201).json({ 
+      code: 200, 
+      success: true, 
+      message: '新闻创建成功',
+      data: {
+        id: newNews._id,
+        ...newsData
+      } 
+    });
   } catch (error) {
-    console.error('Error creating news:', error);
-    errorResponse(res, 500, '新闻发布失败');
+    console.error('创建新闻错误:', error);
+    
+    // 如果发生错误，删除已上传的文件
+    if (req.file) {
+      const filePath = path.join(__dirname, '../../public/uploads/news', req.file.filename);
+      fs.unlink(filePath, (err) => {
+        if (err) console.error('删除上传文件失败:', err);
+      });
+    }
+    
+    res.status(500).json({ 
+      code: 500, 
+      success: false, 
+      message: '服务器错误，请稍后重试' 
+    });
   }
 };
 

@@ -9,7 +9,7 @@
         <el-form-item label="封面图片">
           <el-upload
             class="upload-demo"
-            action="#"
+            action="http://localhost:3000/api/news/publish"
             :before-upload="beforeUpload"
             :on-success="handleUploadSuccess"
             :show-file-list="false"
@@ -30,7 +30,6 @@
           <el-input v-model="form.tags" placeholder="多个标签用逗号分隔"></el-input>
         </el-form-item>
         <el-form-item label="内容">
-          <!-- 使用vue-quill-editor替代@vueup/vue-quill -->
           <quill-editor
             v-model="form.content"
             ref="editor"
@@ -75,13 +74,11 @@ import api from '@/api'
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
-// 引入vue-quill-editor替代@vueup/vue-quill
 import { quillEditor } from 'vue-quill-editor'
 
 export default {
   name: 'NewsPublish',
   components: {
-    // 注册组件
     quillEditor
   },
   data() {
@@ -121,7 +118,6 @@ export default {
   methods: {
     async handlePublish() {
       try {
-        // 处理发布时间，如果用户未选择，则默认立即发布
         if (!this.form.publishTime) {
           this.form.publishTime = new Date()
         }
@@ -147,7 +143,6 @@ export default {
       return isJPG && isLt5M
     },
     handleUploadSuccess(response, file, fileList) {
-      // 这里假设后端返回的图片URL在response.data.url中
       this.form.coverImage = response.data.url
       this.$message.success('封面图片上传成功')
     },

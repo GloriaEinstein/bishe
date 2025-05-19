@@ -1,28 +1,44 @@
 import multer from 'multer';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
+// 获取当前文件目录
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 配置存储引擎
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads/');
+    // 确保上传目录存在
+    const uploadDir = path.join(__dirname, '../../public/uploads/news');
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+    // 生成唯一文件名
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extname = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + extname);
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('不支持的文件类型，仅支持图片上传'), false);
-  }
-};
-
-export const upload = multer({ 
-  storage,
-  fileFilter,
+// 初始化上传中间件
+const upload = multer({ 
+  storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 5 // 5MB
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: function (req, file, cb) {
+    // 检查文件类型
+    const filetypes = /jpeg|jpg|png/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    
+    cb(new Error('只能上传JPG、JPEG或PNG格式的图片'));
   }
-});  
+});
+
+export { upload };
