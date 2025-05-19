@@ -11,6 +11,7 @@ import announcementRoutes from './routes/announcement.js';
 import newsRoutes from './routes/news.js';
 import commentRoutes from './routes/comment.js';
 import activityRoutes from './routes/activity.js';
+import userAnalysisRoutes from './routes/userAnalysis.js';
 
 import { errorHandler } from './middlewares/authMiddleware.js'
 
@@ -49,6 +50,7 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/user-analysis', userAnalysisRoutes);
 
 // 错误处理
 app.use(errorHandler)

@@ -41,7 +41,8 @@ export default {
     },
     getUnverifiedUsers: () => request.get('/users/unverified'),
     verifyUser: (userId) => request.put(`/users/verify/${userId}`),
-    getUserByUsername: (username) => request.get(`/user/by-username/${username}`)
+    getUserByUsername: (username) => request.get(`/user/by-username/${username}`),
+    getUserDataForWordCloud: (userId) => request.get(`/user-analysis/user-data-for-wordcloud/${userId}`)
   },
   notification: {
     publish: (data) => request.post('/notifications/publish', data),
