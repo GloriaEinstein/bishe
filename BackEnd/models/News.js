@@ -1,4 +1,3 @@
-// bishe8/BackEnd/models/News.js
 import mongoose from 'mongoose';
 
 const newsSchema = new mongoose.Schema({
