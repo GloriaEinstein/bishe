@@ -9,21 +9,24 @@
         <el-form-item label="封面图片">
           <el-upload
             class="upload-demo"
-            :action="uploadUrl"
+            action="http://localhost:3000/api/news/publish"
             :before-upload="beforeUpload"
-            :on-success="handleCoverUploadSuccess"
-            :on-error="handleCoverUploadError"
+            :on-success="handleUploadSuccess"
             :show-file-list="false"
             :headers="headers"
-            :auto-upload="true"
+            :data="{
+              title: form.title,
+              content: form.content,
+              category: form.category,
+              tags: form.tags,
+              publishTime: form.publishTime
+            }"
+            name="coverImage"
           >
             <el-button size="small" type="primary">点击上传</el-button>
             <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过5MB</div>
           </el-upload>
-          <div v-if="form.coverImage" class="preview-container">
-            <img :src="form.coverImage" alt="封面图片" class="preview-image">
-            <el-button size="mini" type="danger" @click="removeCover">删除</el-button>
-          </div>
+          <img v-if="form.coverImage" :src="form.coverImage" alt="封面图片" style="max-width: 200px; margin-top: 10px;">
         </el-form-item>
         <el-form-item label="分类">
           <el-select v-model="form.category" placeholder="请选择新闻分类">
@@ -50,18 +53,37 @@
           ></el-date-picker>
         </el-form-item>
         <el-form-item>
+          <el-button type="primary" @click="handlePreview">预览</el-button>
           <el-button type="primary" @click="handlePublish">发布</el-button>
         </el-form-item>
       </el-form>
     </el-card>
+
+    <!-- 预览弹窗 -->
+    <el-dialog :visible.sync="previewVisible" title="新闻预览">
+      <template #content>
+        <div>
+          <h3>{{ form.title }}</h3>
+          <img v-if="form.coverImage" :src="form.coverImage" alt="封面图片" style="max-width: 100%; margin-bottom: 20px;">
+          <p>分类：{{ form.category }}</p>
+          <p>标签：{{ form.tags }}</p>
+          <div v-html="form.content"></div>
+          <p>发布时间：{{ form.publishTime }}</p>
+        </div>
+      </template>
+      <template #footer>
+        <el-button @click="previewVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { quillEditor } from 'vue-quill-editor'
+import api from '@/api'
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
+import { quillEditor } from 'vue-quill-editor'
 
 export default {
   name: 'NewsPublish',
@@ -78,10 +100,7 @@ export default {
         content: '',
         publishTime: null
       },
-      uploadUrl: 'http://localhost:3000/api/upload/cover',
-      headers: {
-        // 如果需要身份验证，添加相应的请求头
-      },
+      previewVisible: false,
       editorOption: {
         theme: 'snow',
         modules: {
@@ -102,81 +121,44 @@ export default {
             ['link', 'image', 'video']
           ]
         }
+      },
+      headers: {
+        // 如果需要身份验证，添加相应的请求头
+        // 'Authorization': `Bearer ${yourToken}`
       }
     }
   },
   methods: {
+    async handlePublish() {
+      try {
+        if (!this.form.publishTime) {
+          this.form.publishTime = new Date()
+        }
+        await api.news.publish(this.form)
+        this.$message.success('新闻发布成功')
+        this.resetForm()
+      } catch (error) {
+        this.$message.error('新闻发布失败')
+      }
+    },
+    handlePreview() {
+      this.previewVisible = true
+    },
     beforeUpload(file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
       const isLt5M = file.size / 1024 / 1024 < 5
-      
       if (!isJPG) {
         this.$message.error('只能上传jpg/png文件')
-        return false
       }
-      
       if (!isLt5M) {
         this.$message.error('图片大小不能超过5MB')
-        return false
       }
-      
-      return true
+      return isJPG && isLt5M
     },
-    
-    handleCoverUploadSuccess(response, file, fileList) {
-      if (response.success) {
-        this.form.coverImage = response.data.url
-        this.$message.success('封面图片上传成功')
-      } else {
-        this.$message.error(response.message || '封面图片上传失败')
-      }
+    handleUploadSuccess(response, file, fileList) {
+      this.form.coverImage = response.data.coverImage; // 确保返回的字段名正确
+      this.$message.success('封面图片上传成功')
     },
-    
-    handleCoverUploadError(error) {
-      this.$message.error('封面图片上传失败')
-      console.error('封面上传错误:', error)
-    },
-    
-    removeCover() {
-      this.form.coverImage = ''
-    },
-    
-    async handlePublish() {
-      try {
-        // 表单验证
-        if (!this.form.title) {
-          this.$message.error('请输入新闻标题')
-          return
-        }
-        
-        if (!this.form.content) {
-          this.$message.error('请输入新闻内容')
-          return
-        }
-        
-        if (!this.form.coverImage) {
-          this.$message.error('请上传封面图片')
-          return
-        }
-        
-        // 提交所有新闻数据
-        const response = await this.$axios.post(
-          'http://localhost:3000/api/news/publish',
-          this.form
-        )
-        
-        if (response.data.success) {
-          this.$message.success('新闻发布成功')
-          this.resetForm()
-        } else {
-          this.$message.error(response.data.message || '新闻发布失败')
-        }
-      } catch (error) {
-        this.$message.error('新闻发布失败')
-        console.error('发布新闻错误:', error)
-      }
-    },
-    
     resetForm() {
       this.form = {
         title: '',
@@ -204,18 +186,99 @@ export default {
   transition: box-shadow 0.3s ease;
 }
 
-.preview-container {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.el-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-.preview-image {
-  max-width: 200px;
-  max-height: 150px;
-  object-fit: contain;
-  border-radius: 4px;
-  border: 1px solid #ebeef5;
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #303133;
+  font-size: 24px;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background-color: #409eff;
+  border-radius: 2px;
+}
+
+.el-form {
+  padding: 0 40px;
+}
+
+.el-form-item {
+  margin-bottom: 22px;
+}
+
+.el-form-item:last-child {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.el-input,
+.el-textarea {
+  border-radius: 8px;
+}
+
+.el-input ::v-deep .el-input__inner,
+.el-textarea ::v-deep .el-textarea__inner {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.el-input ::v-deep .el-input__inner:focus,
+.el-textarea ::v-deep .el-textarea__inner:focus {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+}
+
+.el-button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+/* 内容栏弹性调整样式 */
+.auto-resize-textarea ::v-deep .el-textarea__inner {
+  min-height: 120px !important;
+  max-height: 400px;
+  height: auto !important;
+  resize: none;
+  line-height: 1.6;
+  padding: 12px 16px;
+  white-space: pre-wrap;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .el-form {
+    padding: 0 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .auto-resize-textarea ::v-deep .el-textarea__inner {
+    min-height: 100px;
+    max-height: 300px;
+  }
 }
 </style>
