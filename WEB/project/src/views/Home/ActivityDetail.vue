@@ -65,20 +65,56 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="评论区" name="comments">
-              <div class="comment-section">
-                <el-form :model="commentForm" @submit.prevent="submitComment">
-                  <el-form-item>
-                    <el-input v-model="commentForm.content" type="textarea" placeholder="发表评论"></el-input>
-                  </el-form-item>
-                  <el-form-item>
-                    <el-button type="primary" @click="submitComment">发表</el-button>
-                  </el-form-item>
-                </el-form>
+              <!-- 发布评论区域 -->
+              <div class="post-comment-area">
+                <div class="comment-avatar">
+                  <el-image 
+                    :src="userAvatar" 
+                    fit="cover" 
+                    class="avatar"
+                  ></el-image>
+                </div>
+                <div class="comment-input-wrapper">
+                  <el-input
+                    v-model="commentForm.content"
+                    type="textarea"
+                    :rows="3"
+                    placeholder="分享你的想法..."
+                    @keyup.enter.native="submitComment"
+                  ></el-input>
+                  <div class="comment-action">
+                    <el-button 
+                      type="primary" 
+                      @click="submitComment"
+                      :disabled="!commentForm.content.trim()"
+                    >
+                      发布评论
+                    </el-button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 评论列表 -->
+              <div class="comments-list">
                 <div v-for="comment in comments" :key="comment._id" class="comment-item">
-                  <el-image :src="comment.user.avatar" fit="cover" class="avatar"></el-image>
-                  <span class="user-name">{{ comment.user.name }}</span>
-                  <p class="comment-content">{{ comment.content }}</p>
-                  <el-button type="danger" size="mini" @click="reportComment(comment._id)">举报</el-button>
+                  <div class="comment-avatar">
+                    <el-image 
+                      :src="comment.user.avatar" 
+                      fit="cover" 
+                      class="avatar"
+                    ></el-image>
+                  </div>
+                  <div class="comment-content-wrapper">
+                    <div class="comment-header">
+                      <span class="user-name">{{ comment.user.name }}</span>
+                      <span class="college-info">{{ comment.user.college }}</span>
+                    </div>
+                    <p class="comment-content">{{ comment.content }}</p>
+                    <div class="comment-footer">
+                      <span class="comment-time">{{ formatDate(comment.createdAt) }}</span>
+                      <span class="report-btn" @click="reportComment(comment._id)">举报</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </el-tab-pane>
@@ -153,12 +189,19 @@ export default {
       commentForm: {
         content: ''
       },
-      comments: []
+      comments: [],
+      userAvatar: '@/assets/default-user-avatar.png' // 默认用户头像
+    }
+  },
+  computed: {
+    // 获取当前用户头像
+    userAvatar() {
+      return this.$store.state.user.userInfo.user.avatar || '@/assets/default-user-avatar.png';
     }
   },
   methods: {
     nod() {
-      console.log('this.registeredUsers', this.registeredUsers)
+      console.log(this.comments)
     },
     goBackToHall() {
       this.$router.push('/activity-hall');
@@ -195,7 +238,8 @@ export default {
     async fetchActivityDetail(activityId) {
       try {
         const { data } = await api.activity.getDetail(activityId);
-
+        console.log(data);
+        
         this.activity.title = data.activity.title;
         this.activity.serviceType = data.activity.serviceType;
         this.activity.activityArea = data.activity.activityArea;
@@ -219,24 +263,38 @@ export default {
     },
     async submitComment() {
       try {
+        if (!this.commentForm.content.trim()) {
+          this.$message.warning('评论内容不能为空');
+          return;
+        }
+        
         const response = await api.comment.postComment(this.activityId, this.commentForm.content);
-        // 重新获取最新评论列表
-        const commentsResponse = await api.comment.getComments(this.activityId);
-        this.comments = commentsResponse.data.comments;
+        this.$message.success('评论发布成功');
+        
+        // 刷新评论列表
+        await this.fetchComments(this.activityId);
         this.commentForm.content = '';
+        
+        // 滚动到最新评论
+        this.$nextTick(() => {
+          const commentList = document.querySelector('.comments-list');
+          if (commentList) {
+            commentList.scrollTop = commentList.scrollHeight;
+          }
+        });
       } catch (error) {
+        this.$message.error('评论发布失败，请稍后再试');
         console.error('发表评论失败', error);
       }
     },
     async reportComment(commentId) {
       try {
-        await api.comment.reportComment(commentId); // 直接传递commentId
+        await api.comment.reportComment(commentId);
         this.$message.success('举报成功，等待管理员审核');
-        // 可选：刷新评论列表以更新状态
-        const commentsResponse = await api.comment.getComments(this.activityId);
-        this.comments = commentsResponse.data.comments;
+        await this.fetchComments(this.activityId);
       } catch (error) {
         console.error('举报评论失败', error);
+        this.$message.error('举报失败，请稍后再试');
       }
     },
     // 校验活动ID格式
@@ -251,28 +309,17 @@ export default {
     },
     async fetchComments(activityId) {
       try {
-        const response = await api.comment.getComments(activityId);
+        const data = await api.comment.getComments(activityId);
+        console.log(data);
         
-        if (response.data.comments) {
-          this.comments = response.data.comments;
-        } else {
-          throw new Error('评论数据格式异常');
-        }
+        this.comments = data.data.comments;
+        console.log(this.comments);
+        
       } catch (error) {
         console.error('拉取评论失败:', error);
-        throw error; // 向上传递错误
+        throw error;
       }
     },
-
-    // 统一错误处理
-    handleDataLoadError(error) {
-      console.error('页面初始化失败:', error);
-      this.$message.error({
-        message: '数据加载失败，请检查网络或刷新重试',
-        duration: 3000
-      });
-      // 可选：记录错误日志或回退到默认数据
-    }
   },
   async mounted() {
   try {
@@ -355,6 +402,8 @@ export default {
   --wood-color: #6b4f3a;
   --parchment: #f5f5f5;
   --leaf-light: #b3c99d;
+  --bilibili-blue: #00a1d6;
+  --bilibili-gray: #99a2aa;
 }
 
 .activity-detail-page {
@@ -676,30 +725,158 @@ export default {
     
 }
 
-/* 评论区 */
-.comment-section {
-  padding: 20px;
+/* 评论区样式优化 */
+.post-comment-area {
+  display: flex;
+  padding: 15px;
+  margin-bottom: 20px;
+  background-color: rgba(244, 245, 247, 0.8);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.post-comment-area:hover {
+  background-color: rgba(244, 245, 247, 1);
+  box-shadow: 0 2px 8px rgba(141,166,123,0.1);
+}
+
+.comment-input-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.comment-action .el-button {
+  background-color: var(--bilibili-blue);
+  color: white;
+  border-radius: 4px;
+  padding: 8px 20px;
+  transition: all 0.3s ease;
+}
+
+.comment-action .el-button:hover {
+  background-color: #008ec4;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 161, 214, 0.3);
+}
+
+.comment-action .el-button:disabled {
+  background-color: rgba(0, 161, 214, 0.5);
+  cursor: not-allowed;
+}
+
+.comments-list {
+  margin-top: 20px;
 }
 
 .comment-item {
   display: flex;
-  align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  padding: 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(141,166,123,0.1);
+}
+
+.comment-item:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(141,166,123,0.1);
+}
+
+.comment-avatar {
+  margin-right: 15px;
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid var(--bilibili-blue);
+  transition: all 0.3s ease;
+}
+
+.comment-avatar:hover .avatar {
+  transform: scale(1.1);
+}
+
+.comment-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .user-name {
-  font-weight: bold;
-  margin-right: 10px;
+  font-weight: 600;
+  color: var(--bilibili-blue);
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.user-name:hover {
+  color: var(--forest-dark);
+  text-decoration: underline;
+}
+
+.college-info {
+  color: var(--bilibili-gray);
+  font-size: 13px;
+  background-color: rgba(141,166,123,0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .comment-content {
-  flex-grow: 1;
+  margin: 8px 0;
+  line-height: 1.6;
+  color: var(--wood-color);
+  font-size: 15px;
+  padding: 10px;
+  background-color: rgba(244, 245, 247, 0.5);
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
-</style>
+
+.comment-content:hover {
+  background-color: rgba(244, 245, 247, 0.8);
+}
+
+.comment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.comment-time {
+  color: var(--bilibili-gray);
+  font-size: 13px;
+}
+
+.report-btn {
+  color: var(--bilibili-gray);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.report-btn:hover {
+  color: #ff4d4f;
+  transform: translateY(-1px);
+}
+</style>  
