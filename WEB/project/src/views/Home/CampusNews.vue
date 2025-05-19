@@ -9,6 +9,9 @@
         class="news-item"
       >
         <h3>{{ newsItem.title }}</h3>
+        <img v-if="newsItem.coverImage" :src="newsItem.coverImage" alt="封面图片" style="max-width: 100%; margin-bottom: 20px;">
+        <p>分类：{{ newsItem.category }}</p>
+        <p>标签：{{ newsItem.tags }}</p>
         <p>{{ newsItem.content }}</p>
         <span>{{ formatDate(newsItem.createdAt) }}</span>
       </el-card>

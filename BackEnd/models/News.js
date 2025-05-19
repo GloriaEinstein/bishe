@@ -10,6 +10,18 @@ const newsSchema = new mongoose.Schema({
     type: String,
     required: [true, '新闻内容不能为空'],
   },
+  coverImage: {
+    type: String,
+    default: ''
+  },
+  category: {
+    type: String,
+    default: ''
+  },
+  tags: {
+    type: String,
+    default: ''
+  },
   createdAt: {
     type: Date,
     default: Date.now

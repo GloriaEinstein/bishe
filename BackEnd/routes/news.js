@@ -1,17 +1,12 @@
-// bishe8/BackEnd/routes/news.js
 import express from 'express';
 import { createNews, getNews, getLatestNews } from '../controllers/newsController.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+// 修复：添加文件扩展名
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
-// 发布新闻接口
-router.post('/publish', authMiddleware, createNews);
+router.post('/publish', upload.single('coverImage'), createNews);
+router.get('/list', getNews);
+router.get('/latest/:count', getLatestNews);
 
-// 获取新闻列表接口
-router.get('/list', authMiddleware, getNews);
-
-// 获取最新新闻接口
-router.get('/latest/:count', authMiddleware, getLatestNews);
-
-export default router;
+export default router;  
