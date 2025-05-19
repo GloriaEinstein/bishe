@@ -9,7 +9,6 @@ export const preprocessText = (text) => {
   
   // 使用 jieba 分词
   const words = jieba.cut(text);
-  
   // 过滤停用词并去除空白字符
   return words
     .filter(word => word.trim() !== '')

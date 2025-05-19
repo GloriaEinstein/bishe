@@ -57,20 +57,34 @@ export const postComment = async (req, res) => {
     const activityId = req.params.activityId;
     const { content } = req.body;
     const userId = req.user._id;
+    
     const comment = new Comment({
       activity: activityId,
       user: userId,
       content
     });
+    
     await comment.save();
+    
     // 重新查询并填充用户信息
     const populatedComment = await Comment.findById(comment._id)
       .populate('user', 'name avatar');
-    res.status(201).json({ comment: populatedComment });
+    
+    res.status(201).json({
+      code: 201,
+      success: true,
+      message: '评论发表成功',
+      data: { comment: populatedComment }
+    });
   } catch (error) {
-    res.status(500).json({ message: '发表评论失败', error });
+    res.status(500).json({
+      code: 500,
+      success: false,
+      message: '发表评论失败',
+      error: error.message // 只返回错误消息，避免暴露敏感信息
+    });
   }
-};
+};  
 
 export const reportComment = async (req, res) => {
   try {

@@ -10,6 +10,11 @@
 
     <!-- 数据看板 -->
     <div class="data-panel">
+      <!-- 加载状态 -->
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loader"></div>
+      </div>
+
       <!-- 词云卡片 -->
       <div class="card wordcloud-card">
         <div class="card-header">
@@ -53,11 +58,13 @@ import 'echarts-wordcloud';
 export default {
   data() {
     return {
-      wordcloudData: []
+      wordcloudData: [],
+      isLoading: true // 新增加载状态
     };
   },
   async mounted() {
     try {
+      this.isLoading = true; // 开始加载
       const userId = this.$store.state.user.userInfo.user._id;
       const { data } = await api.user.getUserDataForWordCloud(userId);
       const words = this.processText(data.text);
@@ -74,40 +81,37 @@ export default {
       this.drawWordCloud();
     } catch (error) {
       console.error('获取数据失败', error);
+    } finally {
+      this.isLoading = false; // 确保加载状态关闭
     }
   },
   methods: {
     processText(text) {
-      // 这里可以调用后端的分词服务，为了简单示例，使用前端模拟
       return text.split(' ');
     },
     drawWordCloud() {
       const chart = echarts.init(document.getElementById('wordcloud'));
       const option = {
-        series: [
-          {
-            type: 'wordCloud',
-            shape: 'circle',
-            sizeRange: [12, 60],
-            rotationRange: [-90, 90],
-            textStyle: {
-              normal: {
-                color: function () {
-                  return 'rgb(' + [
-                    Math.round(Math.random() * 160),
-                    Math.round(Math.random() * 160),
-                    Math.round(Math.random() * 160)
-                  ].join(',') + ')';
-                }
-              },
-              emphasis: {
-                shadowBlur: 10,
-                shadowColor: '#333'
-              }
+        series: [{
+          type: 'wordCloud',
+          shape: 'circle',
+          sizeRange: [12, 60],
+          rotationRange: [-90, 90],
+          textStyle: {
+            normal: {
+              color: () => `rgb(${[
+                Math.round(Math.random() * 160),
+                Math.round(Math.random() * 160),
+                Math.round(Math.random() * 160)
+              ].join(',')})`
             },
-            data: this.wordcloudData
-          }
-        ]
+            emphasis: {
+              shadowBlur: 10,
+              shadowColor: '#333'
+            }
+          },
+          data: this.wordcloudData
+        }]
       };
       chart.setOption(option);
     }
@@ -122,7 +126,6 @@ export default {
   min-height: 100vh;
 }
 
-/* 头部样式 */
 .profile-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -153,8 +156,8 @@ export default {
   margin: 0 auto;
 }
 
-/* 数据看板布局 */
 .data-panel {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: 2rem;
@@ -162,7 +165,34 @@ export default {
   margin: 0 auto;
 }
 
-/* 词云卡片样式 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #3498db;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .wordcloud-card {
   background: white;
   border-radius: 20px;
@@ -198,7 +228,6 @@ export default {
   padding: 1rem;
 }
 
-/* 统计面板样式 */
 .stats-panel {
   display: grid;
   gap: 1.5rem;
@@ -245,7 +274,6 @@ export default {
   background: linear-gradient(90deg, #f8f9fa 0%, white 100%);
 }
 
-/* 响应式设计 */
 @media (max-width: 1024px) {
   .data-panel {
     grid-template-columns: 1fr;
