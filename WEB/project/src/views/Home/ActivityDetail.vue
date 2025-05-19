@@ -118,6 +118,10 @@
                 </div>
               </div>
             </el-tab-pane>
+            <el-tab-pane label="学院分布" name="collegeDistribution">
+              <!-- 优化图表容器样式 -->
+              <div id="college-distribution-chart" class="chart-container"></div>
+            </el-tab-pane>
           </el-tabs>
         </div>
       </div>
@@ -164,6 +168,7 @@
 
 <script>
 import api from '@/api'
+import * as echarts from 'echarts';
 
 export default {
   name: 'ActivityDetail',
@@ -320,6 +325,56 @@ export default {
         throw error;
       }
     },
+    drawCollegeDistributionChart() {
+      // 统计每个学院的报名人数
+      const collegeCount = {};
+      this.registeredUsers.forEach(user => {
+        if (collegeCount[user.college]) {
+          collegeCount[user.college]++;
+        } else {
+          collegeCount[user.college] = 1;
+        }
+      });
+
+      // 转换为 ECharts 所需的数据格式
+      const chartData = Object.keys(collegeCount).map(college => ({
+        value: collegeCount[college],
+        name: college
+      }));
+
+      // 初始化 ECharts 实例
+      const chart = echarts.init(document.getElementById('college-distribution-chart'));
+
+      // 优化 ECharts 配置项
+      const option = {
+        title: {
+          text: '学院分布',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          type: 'scroll',
+          orient: 'vertical',
+          right: 10,
+          top: 20,
+          bottom: 20,
+        },
+        series: [
+          {
+            name: '报名人数',
+            type: 'pie',
+            radius: ['30%', '70%'],
+            center: ['50%', '50%'],
+            data: chartData
+          }
+        ]
+      };
+
+      // 使用配置项显示图表
+      chart.setOption(option);
+    }
   },
   async mounted() {
   try {
@@ -348,6 +403,8 @@ export default {
     this.$loading().close();
     this.handleDataLoadError(error);
   }
+
+  this.drawCollegeDistributionChart();
 }
 }
 </script>
@@ -879,4 +936,28 @@ export default {
   color: #ff4d4f;
   transform: translateY(-1px);
 }
-</style>  
+
+/* 学院分布图表容器样式 */
+.chart-container {
+  width: 100%;
+  max-width: 600px;
+  height: 500px;
+  margin: 40px auto 30px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.95);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(45,90,39,0.08);
+  padding: 24px 0;
+  transition: box-shadow 0.3s;
+}
+
+@media (max-width: 900px) {
+  .chart-container {
+    max-width: 100%;
+    height: 320px;
+    padding: 10px 0;
+  }
+}
+</style>
