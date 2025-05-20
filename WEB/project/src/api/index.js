@@ -62,4 +62,7 @@ export default {
     postComment: (activityId, content) => request.post(`/comments/${activityId}`, { content }),
     reportComment: (commentId) => request.post(`/comments/report/${commentId}`) // 路径对应新路由
   },
+  recommendation: {
+    getRecommendations: () => request.get('/recommendations')
+  },
 };

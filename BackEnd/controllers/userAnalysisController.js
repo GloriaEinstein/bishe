@@ -51,21 +51,20 @@ export const getUserDataForWordCloud = async (req, res) => {
     }
     const commentText = comments.map(comment => comment.content).join(' ');
 
-    const allText = userInfoText + ' ' + activityText + ' ' + commentText;
+    const allText = [userInfoText, activityText, commentText];
 
     // 对文本进行预处理
-    const preprocessedWords = preprocessText(allText);
-    const preprocessedText = preprocessedWords.join(' ');
+    const preprocessedTexts = allText.map(text => preprocessText(text).join(' '));
 
     // 提取关键词
-    const keywords = extractKeywords(preprocessedText);
+    const keywords = extractKeywords(preprocessedTexts);
 
     res.status(200).json({ 
       code: 200,
       success: true,
       message: '获取数据成功',
       data: { 
-        text: preprocessedText,
+        text: preprocessedTexts.join(' '),
         commentCount: comments.length,
         keywords: keywords
       } 
