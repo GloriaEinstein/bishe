@@ -10,7 +10,9 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.1",
     "axios": "^1.5.0",
+    "core-js": "^3.42.0",
     "echarts": "^5.4.0",
     "echarts-wordcloud": "^2.1.0",
     "element-ui": "^2.15.10",
