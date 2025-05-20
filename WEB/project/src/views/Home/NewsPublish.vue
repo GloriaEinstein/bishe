@@ -2,28 +2,28 @@
   <div class="news-publish">
     <el-card>
       <h2>新闻发布</h2>
-      <el-form :model="form" :rules="rules" ref="newsForm" label-width="80px">
-        <el-form-item label="标题" prop="title">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="标题">
           <el-input v-model="form.title" />
         </el-form-item>
-        <el-form-item label="分类" prop="category">
+        <el-form-item label="分类">
           <el-select v-model="form.category" placeholder="请选择新闻分类">
             <el-option label="校园动态" value="校园动态"></el-option>
             <el-option label="学术科研" value="学术科研"></el-option>
             <el-option label="文体活动" value="文体活动"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="标签" prop="tags">
+        <el-form-item label="标签">
           <el-input v-model="form.tags" placeholder="多个标签用逗号分隔"></el-input>
         </el-form-item>
-        <el-form-item label="内容" prop="content">
+        <el-form-item label="内容">
           <quill-editor
             v-model="form.content"
             ref="editor"
             :options="editorOption"
           ></quill-editor>
         </el-form-item>
-        <el-form-item label="发布时间" prop="publishTime">
+        <el-form-item label="发布时间">
           <el-date-picker
             v-model="form.publishTime"
             type="datetime"
@@ -39,15 +39,15 @@
 
     <!-- 预览弹窗 -->
     <el-dialog :visible.sync="previewVisible" title="新闻预览">
-      <div class="preview-content">
-        <h3>{{ form.title }}</h3>
-        <p class="preview-meta">
-          <span>分类：{{ form.category }}</span>
-          <span class="ml-4">标签：{{ form.tags }}</span>
-        </p>
-        <div class="preview-body" v-html="form.content"></div>
-        <p class="preview-meta">发布时间：{{ formattedPublishTime }}</p>
-      </div>
+      <template #content>
+        <div>
+          <h3>{{ form.title }}</h3>
+          <p>分类：{{ form.category }}</p>
+          <p>标签：{{ form.tags }}</p>
+          <div v-html="form.content"></div>
+          <p>发布时间：{{ form.publishTime }}</p>
+        </div>
+      </template>
       <template #footer>
         <el-button @click="previewVisible = false">关闭</el-button>
       </template>
@@ -61,7 +61,6 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 import { quillEditor } from 'vue-quill-editor'
-import { format } from 'date-fns'
 
 export default {
   name: 'NewsPublish',
@@ -99,105 +98,42 @@ export default {
           ]
         }
       },
-      rules: {
-        title: [
-          { required: true, message: '新闻标题不能为空', trigger: 'blur' }
-        ],
-        content: [
-          { required: true, message: '新闻内容不能为空', trigger: 'blur' }
-        ]
+      headers: {
+        // 如果需要身份验证，添加相应的请求头
+        // 'Authorization': `Bearer ${yourToken}`
       }
-    }
-  },
-  computed: {
-    formattedPublishTime() {
-      return this.form.publishTime 
-        ? format(new Date(this.form.publishTime), 'yyyy-MM-dd HH:mm:ss')
-        : '立即发布'
     }
   },
   methods: {
     async handlePublish() {
-      this.$refs.newsForm.validate(async (valid) => {
-        if (valid) {
-          try {
-            if (!this.form.publishTime) {
-              this.form.publishTime = new Date()
-            }
-            await api.news.publishNews(this.form)
-            this.$message.success('新闻发布成功')
-            this.resetForm()
-          } catch (error) {
-            this.$message.error('新闻发布失败')
-          }
-        } else {
-          this.$message.error('请填写必要信息')
+      try {
+        if (!this.form.publishTime) {
+          this.form.publishTime = new Date()
         }
-      })
+        await api.news.publishNews(this.form)
+        this.$message.success('新闻发布成功')
+        this.resetForm()
+      } catch (error) {
+        this.$message.error('新闻发布失败')
+      }
     },
     handlePreview() {
-      const hasContent = this.form.content.replace(/<[^>]+>/g, '').trim().length > 0
-      if (!hasContent) {
-        this.$message.warning('请先输入新闻内容')
-        return
-      }
       this.previewVisible = true
     },
     resetForm() {
-      this.$refs.newsForm.resetFields()
-      this.form.content = ''
+      this.form = {
+        title: '',
+        category: '',
+        tags: '',
+        content: '',
+        publishTime: null
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.news-publish {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
-
-.el-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 24px;
-  position: relative;
-}
-
-h2::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background-color: #409eff;
-}
-
-.preview-content {
-  padding: 20px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  background-color: #fafafa;
-}
-
-.preview-body >>> .ql-editor {
-  padding: 0;
-  background: white;
-}
-
-.preview-body img {
-  max-width: 100%;
-  margin: 10px 0;
-}
-
 .news-publish {
   max-width: 800px;
   margin: 0 auto;
