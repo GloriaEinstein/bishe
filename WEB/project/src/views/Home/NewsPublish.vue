@@ -31,26 +31,10 @@
           ></el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handlePreview">预览</el-button>
           <el-button type="primary" @click="handlePublish">发布</el-button>
         </el-form-item>
       </el-form>
     </el-card>
-
-    <el-dialog :visible.sync="previewVisible" title="新闻预览">
-      <div class="preview-content">
-        <h3>{{ form.title }}</h3>
-        <p class="preview-meta">
-          <span>分类：{{ form.category }}</span>
-          <span class="ml-4">标签：{{ form.tags }}</span>
-        </p>
-        <div class="preview-body" v-html="form.content"></div>
-        <p class="preview-meta">发布时间：{{ formattedPublishTime }}</p>
-      </div>
-      <template #footer>
-        <el-button @click="previewVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -75,7 +59,6 @@ export default {
         content: '',
         publishTime: null
       },
-      previewVisible: false,
       editorOption: {
         theme: 'snow',
         modules: {
@@ -132,14 +115,6 @@ export default {
           this.$message.error('请填写必要信息')
         }
       })
-    },
-    handlePreview() {
-      const hasContent = this.form.content.replace(/<[^>]+>/g, '').trim().length > 0
-      if (!hasContent) {
-        this.$message.warning('请先输入新闻内容')
-        return
-      }
-      this.previewVisible = true
     },
     resetForm() {
       this.$refs.newsForm.resetFields()
@@ -216,45 +191,6 @@ h2::after {
 .el-input ::v-deep .el-input__inner:focus,
 .el-textarea ::v-deep .el-textarea__inner:focus {
   border-color: #409eff;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
-}
-
-.el-button {
-  padding: 10px 24px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
-}
-
-.preview-content {
-  padding: 20px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  background-color: #fafafa;
-}
-
-.preview-body >>> .ql-editor {
-  padding: 0;
-  background: white;
-}
-
-.preview-body img {
-  max-width: 100%;
-  margin: 10px 0;
-}
-
-@media (max-width: 768px) {
-  .el-form {
-    padding: 0 20px;
-  }
-
-  h2 {
-    font-size: 20px;
-    margin-bottom: 25px;
-  }
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 </style>

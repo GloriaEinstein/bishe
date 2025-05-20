@@ -75,7 +75,7 @@
         </div>
         <!-- 移除报名按钮 -->
       </div>
-      </div>
+    </div>
   </div>
 </template>
 
@@ -86,7 +86,8 @@ export default {
   name: 'ActivityHall',
   data() {
     return {
-      activities: [],
+      allActivities: [], // 存储所有活动
+      activities: [], // 存储筛选后的活动
       filterForm: {
         area: '',
         serviceType: '',
@@ -97,7 +98,7 @@ export default {
     }
   },
   async mounted() {
-    this.fetchActivities();
+    await this.fetchActivities();
   },
   methods: {
     getTimeLeft(endTime) {
@@ -128,7 +129,6 @@ export default {
     },
     goToActivityDetail(activityId) {
       console.log(activityId);
-      
       this.$router.push(`/activity-detail/${activityId}`);
     },
     formatDate(date) {
@@ -136,14 +136,15 @@ export default {
     },
     async fetchActivities() {
       try {
-        const { data } = await api.activity.getList(this.filterForm);
-        this.activities = data.activities;
+        const { data } = await api.activity.getList();
+        this.allActivities = data.activities;
+        this.applyFilters();
       } catch (error) {
         this.$message.error('获取活动列表失败');
       }
     },
     async handleFilter() {
-      await this.fetchActivities();
+      this.applyFilters();
     },
     resetFilter() {
       this.filterForm = {
@@ -153,10 +154,42 @@ export default {
         serviceTarget: '',
         participantCount: ''
       };
-      this.fetchActivities();
+      this.applyFilters();
     },
     getImageUrl(serviceType) {
       return require(`@/assets/${serviceType}.png`);
+    },
+    applyFilters() {
+      let filteredActivities = this.allActivities;
+
+      if (this.filterForm.area) {
+        filteredActivities = filteredActivities.filter(activity => activity.activityArea === this.filterForm.area);
+      }
+
+      if (this.filterForm.serviceType) {
+        filteredActivities = filteredActivities.filter(activity => activity.serviceType === this.filterForm.serviceType);
+      }
+
+      if (this.filterForm.projectStatus && this.filterForm.projectStatus!== '全部') {
+        filteredActivities = filteredActivities.filter(activity => activity.projectStatus === this.filterForm.projectStatus);
+      }
+
+      if (this.filterForm.serviceTarget) {
+        filteredActivities = filteredActivities.filter(activity => activity.serviceTarget === this.filterForm.serviceTarget);
+      }
+
+      if (this.filterForm.participantCount) {
+        const [min, max] = this.filterForm.participantCount.split('-').map(Number);
+        if (max) {
+          filteredActivities = filteredActivities.filter(activity => activity.participantCount >= min && activity.participantCount <= max);
+        } else if (this.filterForm.participantCount === '0') {
+          filteredActivities = filteredActivities.filter(activity => activity.participantCount === 0);
+        } else {
+          filteredActivities = filteredActivities.filter(activity => activity.participantCount >= min);
+        }
+      }
+
+      this.activities = filteredActivities;
     }
   }
 }
