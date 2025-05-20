@@ -17,18 +17,10 @@ export const createNews = async (req, res) => {
       });
     }
     
-    if (!req.body.coverImage) {
-      return res.status(400).json({
-        success: false,
-        message: '请上传封面图片'
-      });
-    }
-    
     // 创建新闻
     const newNews = new News({
       title: req.body.title,
       content: req.body.content,
-      coverImage: req.body.coverImage,
       category: req.body.category,
       tags: req.body.tags,
       publishTime: req.body.publishTime || new Date()

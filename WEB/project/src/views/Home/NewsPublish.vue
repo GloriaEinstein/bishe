@@ -6,28 +6,6 @@
         <el-form-item label="标题">
           <el-input v-model="form.title" />
         </el-form-item>
-        <el-form-item label="封面图片">
-          <el-upload
-            class="upload-demo"
-            action="http://localhost:3000/api/news/publish"
-            :before-upload="beforeUpload"
-            :on-success="handleUploadSuccess"
-            :show-file-list="false"
-            :headers="headers"
-            :data="{
-              title: form.title,
-              content: form.content,
-              category: form.category,
-              tags: form.tags,
-              publishTime: form.publishTime
-            }"
-            name="coverImage"
-          >
-            <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过5MB</div>
-          </el-upload>
-          <img v-if="form.coverImage" :src="form.coverImage" alt="封面图片" style="max-width: 200px; margin-top: 10px;">
-        </el-form-item>
         <el-form-item label="分类">
           <el-select v-model="form.category" placeholder="请选择新闻分类">
             <el-option label="校园动态" value="校园动态"></el-option>
@@ -64,7 +42,6 @@
       <template #content>
         <div>
           <h3>{{ form.title }}</h3>
-          <img v-if="form.coverImage" :src="form.coverImage" alt="封面图片" style="max-width: 100%; margin-bottom: 20px;">
           <p>分类：{{ form.category }}</p>
           <p>标签：{{ form.tags }}</p>
           <div v-html="form.content"></div>
@@ -94,7 +71,6 @@ export default {
     return {
       form: {
         title: '',
-        coverImage: '',
         category: '',
         tags: '',
         content: '',
@@ -134,7 +110,7 @@ export default {
         if (!this.form.publishTime) {
           this.form.publishTime = new Date()
         }
-        await api.news.publish(this.form)
+        await api.news.publishNews(this.form)
         this.$message.success('新闻发布成功')
         this.resetForm()
       } catch (error) {
@@ -144,25 +120,9 @@ export default {
     handlePreview() {
       this.previewVisible = true
     },
-    beforeUpload(file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
-      const isLt5M = file.size / 1024 / 1024 < 5
-      if (!isJPG) {
-        this.$message.error('只能上传jpg/png文件')
-      }
-      if (!isLt5M) {
-        this.$message.error('图片大小不能超过5MB')
-      }
-      return isJPG && isLt5M
-    },
-    handleUploadSuccess(response, file, fileList) {
-      this.form.coverImage = response.data.coverImage; // 确保返回的字段名正确
-      this.$message.success('封面图片上传成功')
-    },
     resetForm() {
       this.form = {
         title: '',
-        coverImage: '',
         category: '',
         tags: '',
         content: '',

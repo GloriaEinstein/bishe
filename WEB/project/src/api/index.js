@@ -18,6 +18,8 @@ const activityApi = {
 };
 
 const newsApi = {
+  publishNews: (data) => service.post('/news/publish', data),
+  getNewsList: (params = {}) => service.get('/news/list', { params }),
   getLatestNews: (count) => request.get(`/news/latest/${count}`)
 };
 

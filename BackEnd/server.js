@@ -12,7 +12,6 @@ import newsRoutes from './routes/news.js';
 import commentRoutes from './routes/comment.js';
 import activityRoutes from './routes/activity.js';
 import userAnalysisRoutes from './routes/userAnalysis.js';
-import uploadRoutes from './routes/upload.js';
 
 import { errorHandler } from './middlewares/authMiddleware.js'
 
@@ -52,7 +51,6 @@ app.use('/api/news', newsRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/user-analysis', userAnalysisRoutes);
-app.use('/api/upload', uploadRoutes);
 
 // 错误处理
 app.use(errorHandler)
