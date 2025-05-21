@@ -1,6 +1,6 @@
 // bishe4/BackEnd/routes/notification.js
 import express from 'express';
-import { createNotification, getNotifications, markNotificationAsRead } from '../controllers/notificationController.js';
+import { createNotification, getNotifications, markNotificationAsRead, sendWarning } from '../controllers/notificationController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -13,5 +13,8 @@ router.get('/list', authMiddleware, getNotifications);
 
 // 标记通知为已读接口
 router.put('/:notificationId/mark-as-read', authMiddleware, markNotificationAsRead);
+
+
+router.post('/send-warning', authMiddleware, sendWarning);
 
 export default router;

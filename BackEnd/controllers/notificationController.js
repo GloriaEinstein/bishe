@@ -37,3 +37,18 @@ export const markNotificationAsRead = async (req, res) => {
     errorResponse(res, 500, '标记通知为已读失败');
   }
 };
+
+export const sendWarning = async (req, res) => {
+  try {
+    const { userId, content } = req.body;
+    const warningNotification = await Notification.create({ 
+      title: '警告通知',
+      content,
+      userId
+    });
+    successResponse(res, { warningNotification }, '警告消息发送成功');
+  } catch (error) {
+    errorResponse(res, 500, '警告消息发送失败');
+  }
+};
+

@@ -90,8 +90,78 @@ export const reportComment = async (req, res) => {
   try {
     const commentId = req.params.commentId;
     const comment = await Comment.findByIdAndUpdate(commentId, { isReported: true }, { new: true });
-    res.status(200).json({ message: '举报成功', comment });
+    res.status(200).json({ 
+      code: 200,
+      success: true,
+      message: '举报成功', 
+      comment 
+    });
   } catch (error) {
-    res.status(500).json({ message: '举报评论失败', error });
+    res.status(500).json({ 
+      code: 500,
+      success: false,
+      message: '举报评论失败', 
+      error: error.message 
+    });
   }
 };
+
+export const deleteComment = async (req, res) => {
+  try {
+    const commentId = req.params.commentId;
+    await Comment.findByIdAndDelete(commentId);
+    res.status(200).json({ 
+      code: 200,
+      success: true,
+      message: '评论删除成功'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      code: 500,
+      success: false,
+      message: '删除评论失败',
+      error: error.message 
+    });
+  }
+};
+
+export const ignoreReport = async (req, res) => {
+  try {
+    const commentId = req.params.commentId;
+    await Comment.findByIdAndUpdate(commentId, { isReported: false }, { new: true });
+    res.status(200).json({ 
+      code: 200,
+      success: true,
+      message: '举报已忽略'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      code: 500,
+      success: false,
+      message: '忽略举报失败',
+      error: error.message 
+    });
+  }
+};
+
+export const getReportedComments = async (req, res) => {
+  try {
+    const reportedComments = await Comment.find({ isReported: true }).populate('user', 'name avatar');
+    res.status(200).json({ 
+      code: 200,
+      success: true,
+      message: '获取被举报评论列表成功',
+      data: { reportedComments }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      code: 500,
+      success: false,
+      message: '获取被举报评论列表失败',
+      error: error.message 
+    });
+  }
+};
+
+
+

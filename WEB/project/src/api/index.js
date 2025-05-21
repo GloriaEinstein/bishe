@@ -50,7 +50,8 @@ export default {
     publish: (data) => request.post('/notifications/publish', data),
     getList: () => request.get('/notifications/list'),
     markAsRead: (notificationId) => request.put(`/notifications/${notificationId}/mark-as-read`),
-    getUnreadCount: () => request.get('/notifications/unreadCount')
+    getUnreadCount: () => request.get('/notifications/unreadCount'),
+    sendWarning: (userId, content) => request.post('/notifications/send-warning', { userId, content })
   },
   announcement: {
     publish: (data) => request.post('/announcements/publish', data),
@@ -60,7 +61,10 @@ export default {
   comment: {
     getComments: (activityId) => request.get(`/comments/${activityId}`),
     postComment: (activityId, content) => request.post(`/comments/${activityId}`, { content }),
-    reportComment: (commentId) => request.post(`/comments/report/${commentId}`) // 路径对应新路由
+    reportComment: (commentId) => request.post(`/comments/report/${commentId}`) ,// 路径对应新路由
+    getReportedComments: () => request.get('/comments/reported'),
+    deleteComment: (commentId) => request.delete(`/comments/${commentId}`),
+    ignoreReport: (commentId) => request.put(`/comments/ignore/${commentId}`)
   },
   recommendation: {
     getRecommendations: () => request.get('/recommendations')

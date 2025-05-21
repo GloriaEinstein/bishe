@@ -5,6 +5,6 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 // 获取推荐数据接口
-router.get('/recommendations', authMiddleware, getRecommendations);
+router.get('/', authMiddleware, getRecommendations);
 
 export default router;
