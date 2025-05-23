@@ -14,13 +14,15 @@ const activityApi = {
   register: (activityId, data) => request.post(`/activity/${activityId}/register`, data),
   getLatestActivities: (count) => request.get(`/activity/latest/${count}`),
   getDetail: (activityId) => request.get(`/activity/${activityId}`),
-  getRegisteredUsers: (activityId) => request.get(`/activity/${activityId}/registered-users`)
+  getRegisteredUsers: (activityId) => request.get(`/activity/${activityId}/registered-users`),
+  getActivityKeywords: () => request.get('/activity/activity-keywords')
 };
 
 const newsApi = {
   publishNews: (data) => request.post('/news/publish', data),
   getNewsList: (params = {}) => request.get('/news/list', { params }),
-  getLatestNews: (count) => request.get(`/news/latest/${count}`)
+  getLatestNews: (count) => request.get(`/news/latest/${count}`),
+  getNewsKeywords: () => request.get('/news/news-keywords'),
 };
 
 export default {

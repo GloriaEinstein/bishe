@@ -167,3 +167,13 @@ export const getRegisteredUsers = async (req, res) => {
     errorResponse(res, 500, '获取已报名人员列表失败');
   }
 };
+
+export const getActivityKeywords = async (req, res) => {
+  try {
+    const activityKeywords = await ActivityKeywords.find();
+    successResponse(res, { activityKeywords }, '获取活动关键词成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取活动关键词失败');
+  }
+};
+

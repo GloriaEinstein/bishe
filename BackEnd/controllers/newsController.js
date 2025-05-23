@@ -97,3 +97,22 @@ export const getLatestNews = async (req, res) => {
     });
   }
 };
+
+export const getNewsKeywords = async (req, res) => {
+  try {
+    const newsKeywords = await NewsKeywords.find();
+    res.status(200).json({
+      code: 200,
+      success: true,
+      message: '获取新闻关键词成功',
+      data: {newsKeywords}
+    });
+  } catch (error) {
+    console.error('获取新闻关键词失败:', error);
+    res.status(500).json({
+      code: 503, // 自定义错误码，表示获取关键词失败
+      success: false,
+      message: '获取新闻关键词失败'
+    });
+  }
+};

@@ -1,5 +1,6 @@
 import express from 'express';
-import { createActivity, getActivities, registerActivity, getLatestActivities, getActivityDetail, getRegisteredUsers} from '../controllers/activityController.js';
+import ActivityKeywords from '../models/ActivityKeywords.js';
+import { createActivity, getActivities, registerActivity, getLatestActivities, getActivityDetail, getRegisteredUsers, getActivityKeywords} from '../controllers/activityController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -20,4 +21,7 @@ router.get('/latest/:count', authMiddleware, getLatestActivities);
 router.get('/:activityId', authMiddleware, getActivityDetail);
 
 router.get('/:activityId/registered-users', authMiddleware, getRegisteredUsers);
+
+router.get('/activity-keywords', getActivityKeywords);
+
 export default router;
