@@ -25,8 +25,8 @@ export const preprocessText = (text) => {
   
   // 过滤停用词、空白字符和特定词性的词
   return words
-    .filter(word => word.trim() !== '')
-    .filter(word => !stopwords.includes(word))
+    .filter(word => word.trim()!== '')
+    .filter(word =>!stopwords.includes(word))
     .filter((word) => {
       const pos = jieba.tag(word)[0].tag;
       // 只保留名词、动词、形容词
@@ -56,3 +56,27 @@ export const extractKeywords = (texts, topN = 20) => {
   
   return topKeywords.map(item => item.term);
 };
+
+// 新增方法：对单个文本提取关键词
+export const extractKeywordsFromSingleText = (text, topN = 20) => {
+  return extractKeywords([text], topN);
+};
+
+// 计算余弦相似度
+export const calculateKeywordSimilarity = (keywords1, keywords2) => {
+  if (!keywords1 || !keywords2 || keywords1.length === 0 || keywords2.length === 0) {
+    return 0;
+  }
+  // 构建词袋模型
+  const allTerms = [...new Set([...keywords1, ...keywords2])];
+  // 构建向量
+  const vector1 = allTerms.map(term => keywords1.includes(term)? 1 : 0);
+  const vector2 = allTerms.map(term => keywords2.includes(term)? 1 : 0);
+  // 计算点积
+  const dotProduct = vector1.reduce((sum, value, index) => sum + (value * vector2[index]), 0);
+  // 计算向量长度
+  const magnitude1 = Math.sqrt(vector1.reduce((sum, value) => sum + (value * value), 0));
+  const magnitude2 = Math.sqrt(vector2.reduce((sum, value) => sum + (value * value), 0));
+  // 计算余弦相似度
+  return magnitude1 && magnitude2? dotProduct / (magnitude1 * magnitude2) : 0;
+};    
