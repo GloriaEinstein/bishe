@@ -17,11 +17,13 @@ router.post('/:activityId/register', authMiddleware, registerActivity);
 // 获取最新活动接口
 router.get('/latest/:count', authMiddleware, getLatestActivities);
 
+router.get('/activity-keywords', getActivityKeywords);
+
 // 获取活动详情接口
 router.get('/:activityId', authMiddleware, getActivityDetail);
 
 router.get('/:activityId/registered-users', authMiddleware, getRegisteredUsers);
 
-router.get('/activity-keywords', getActivityKeywords);
+
 
 export default router;

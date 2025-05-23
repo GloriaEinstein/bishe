@@ -171,9 +171,13 @@ export const getRegisteredUsers = async (req, res) => {
 export const getActivityKeywords = async (req, res) => {
   try {
     const activityKeywords = await ActivityKeywords.find();
+    console.log('活动关键词:', ActivityKeywords); // 记录详细的关键词信息
+    
     successResponse(res, { activityKeywords }, '获取活动关键词成功');
   } catch (error) {
+    console.error('获取活动关键词失败:', error); // 记录详细错误信息
     errorResponse(res, 500, '获取活动关键词失败');
   }
 };
+
 
