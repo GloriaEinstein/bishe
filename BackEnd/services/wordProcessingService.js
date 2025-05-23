@@ -70,6 +70,7 @@ export const preprocessText = (text) => {
 export const extractKeywords = (texts, topN = 20) => {
   if (!texts || texts.length === 0) return [];
   
+  const TfIdf = natural.TfIdf; 
   const tfidf = new TfIdf();
   texts.forEach(text => {
     tfidf.addDocument(text);
@@ -109,4 +110,66 @@ export const extractKeywordsFromSingleText = (text) => {
     .sort((a, b) => b.tfidf - a.tfidf)
     .slice(0, 10)
     .map(item => item.term);
+};
+
+/**
+ * 计算两个向量的余弦相似度
+ * @param {Array} vectorA - 向量A
+ * @param {Array} vectorB - 向量B
+ * @returns {Number} - 余弦相似度分数 (-1到1)
+ */
+export const cosineSimilarity = (vectorA, vectorB) => {
+  const dotProduct = vectorA.reduce((sum, a, i) => sum + a * vectorB[i], 0);
+  const magnitudeA = Math.sqrt(vectorA.reduce((sum, a) => sum + a * a, 0));
+  const magnitudeB = Math.sqrt(vectorB.reduce((sum, b) => sum + b * b, 0));
+  
+  if (magnitudeA === 0 || magnitudeB === 0) {
+    return 0;
+  }
+  
+  return dotProduct / (magnitudeA * magnitudeB);
+};
+
+
+/**
+ * 为用户和内容创建关键词向量
+ * @param {Array} allKeywords - 所有关键词列表
+ * @param {Array} targetKeywords - 目标关键词列表
+ * @returns {Array} - 关键词向量
+ */
+export const createKeywordVector = (allKeywords, targetKeywords) => {
+  return allKeywords.map(keyword => 
+    targetKeywords.includes(keyword) ? 1 : 0
+  );
+};
+
+export const calculateKeywordSimilarity = (userKeywords, contentKeywords) => {
+  if (!userKeywords || !contentKeywords || userKeywords.length === 0 || contentKeywords.length === 0) {
+    return 0;
+  }
+
+  // 合并所有关键词创建词汇表
+  const vocabulary = [...new Set([...userKeywords, ...contentKeywords])];
+  
+  // 创建向量
+  const userVector = createKeywordVector(vocabulary, userKeywords);
+  const contentVector = createKeywordVector(vocabulary, contentKeywords);
+  
+  // 计算余弦相似度
+  return cosineSimilarity(userVector, contentVector);
+};
+
+/**
+ * 计算两个用户之间的相似度
+ * @param {Object} userA - 用户A的关键词和交互数据
+ * @param {Object} userB - 用户B的关键词和交互数据
+ * @returns {Number} - 用户相似度分数
+ */
+export const calculateUserSimilarity = (userA, userB, allKeywords) => {
+  // 创建用户关键词向量
+  const userAVector = createKeywordVector(allKeywords, userA.keywords);
+  const userBVector = createKeywordVector(allKeywords, userB.keywords);
+  
+  // 计算余弦相似度
+  return cosineSimilarity(userAVector, userBVector);
 };

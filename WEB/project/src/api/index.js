@@ -23,12 +23,7 @@ const newsApi = {
   getLatestNews: (count) => request.get(`/news/latest/${count}`)
 };
 
-export default {getIntelligentRecommendations() {
-    return request({
-      url: '/api/recommendations/intelligent',
-      method: 'get'
-    });
-  },
+export default {
   activity: activityApi,
   auth: {
     login: (data) => request.post('/auth/login', data),
@@ -72,6 +67,6 @@ export default {getIntelligentRecommendations() {
     ignoreReport: (commentId) => request.put(`/comments/ignore/${commentId}`)
   },
   recommendation: {
-    getRecommendations: () => request.get('/recommendations')
+    getIntelligentRecommendations: () => request.get('/recommendations/intelligent')
   },
 };
