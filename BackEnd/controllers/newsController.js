@@ -116,3 +116,15 @@ export const getNewsKeywords = async (req, res) => {
     });
   }
 };
+
+export const getNewsDetail = async (req, res) => {
+  try {
+    const news = await News.findById(req.params.newsId)
+    if (!news) {
+      return errorResponse(res, 404, '新闻未找到');
+    }
+    successResponse(res, { news }, '获取新闻详情成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取新闻详情失败');
+  }
+};

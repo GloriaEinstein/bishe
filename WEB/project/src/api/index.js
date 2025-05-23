@@ -23,6 +23,7 @@ const newsApi = {
   getNewsList: (params = {}) => request.get('/news/list', { params }),
   getLatestNews: (count) => request.get(`/news/latest/${count}`),
   getNewsKeywords: () => request.get('/news/news-keywords'),
+  getDetail: (newsId) => request.get(`/news/${newsId}`)
 };
 
 export default {
