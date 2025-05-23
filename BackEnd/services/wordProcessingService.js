@@ -3,10 +3,9 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const stopwords = require('stopwords-zh/stopwords-zh.json');
 import jieba from 'nodejieba';
+import natural from 'natural'; 
+import { stripHtml } from 'string-strip-html';
 
-// 修改导入方式以兼容 CommonJS 模块
-const natural = require('natural');
-const { TfIdf } = natural;
 
 // 引入词性标注
 jieba.load({
@@ -17,21 +16,55 @@ jieba.load({
   stopWordDict: jieba.DEFAULT_STOP_WORD_DICT
 });
 
+function removeDuplicates(text) {
+  const paragraphs = text.split('\n');
+  const uniqueParagraphs = [];
+  
+  paragraphs.forEach(paragraph => {
+    if (paragraph.trim() !== '' && 
+        !uniqueParagraphs.some(p => p.trim() === paragraph.trim())) {
+      uniqueParagraphs.push(paragraph);
+    }
+  });
+  
+  return uniqueParagraphs.join('\n');
+}
+// 1. 文本预处理：分词 + 去除停用词 + 过滤无效字符
 export const preprocessText = (text) => {
-  if (!text || text.trim() === '') return [];
+  console.log('原始文本:', text);
   
-  // 使用 jieba 分词
-  const words = jieba.cut(text);
+  if (!text || typeof text !== 'string') {
+    console.log('警告：文本为空或非字符串类型');
+    return [];
+  }
   
-  // 过滤停用词、空白字符和特定词性的词
-  return words
-    .filter(word => word.trim()!== '')
-    .filter(word =>!stopwords.includes(word))
-    .filter((word) => {
-      const pos = jieba.tag(word)[0].tag;
-      // 只保留名词、动词、形容词
-      return ['n', 'v', 'a'].includes(pos[0]); 
-    });
+  // 1. 去除HTML标签
+  const cleanText = stripHtml(text).result;
+  
+  // 2. 去除特殊符号
+  let processedText = cleanText
+    .replace(/【.*?】/g, '') // 去除【】及其内容
+    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g, ' ') // 替换特殊符号为空格
+    .replace(/\s+/g, ' ') // 合并连续空格
+    .trim();
+  
+  // 3. 去除重复内容
+  processedText = removeDuplicates(processedText);
+  
+  console.log('处理后的文本:', processedText);
+  
+  // 4. 分词
+  const words = jieba.cut(processedText);
+  console.log('分词结果（原始）:', words);
+  
+  // 5. 过滤规则：保留长度≥2的中文、字母和数字组合
+  const filteredWords = words.filter(word => {
+    const isValid = /^[\u4e00-\u9fa5a-zA-Z0-9]{2,}$/.test(word);
+    return isValid;
+  });
+  
+  console.log('分词结果（过滤后）:', filteredWords);
+  return filteredWords;
 };
 
 export const extractKeywords = (texts, topN = 20) => {
@@ -57,26 +90,23 @@ export const extractKeywords = (texts, topN = 20) => {
   return topKeywords.map(item => item.term);
 };
 
-// 新增方法：对单个文本提取关键词
-export const extractKeywordsFromSingleText = (text, topN = 20) => {
-  return extractKeywords([text], topN);
+// 2. 基于 TF-IDF 提取关键词（单文本场景）
+export const extractKeywordsFromSingleText = (text) => {
+  if (!text) return [];
+  
+  // 使用TF-IDF提取关键词
+  const TfIdf = natural.TfIdf; // 获取 TfIdf 类
+  const tfidfInstance = new TfIdf();
+  tfidfInstance.addDocument(text);
+  
+  const terms = [];
+  tfidfInstance.listTerms(0).forEach(item => {
+    terms.push({ term: item.term, tfidf: item.tfidf });
+  });
+  
+  // 按TF-IDF值排序并返回前10个关键词
+  return terms
+    .sort((a, b) => b.tfidf - a.tfidf)
+    .slice(0, 10)
+    .map(item => item.term);
 };
-
-// 计算余弦相似度
-export const calculateKeywordSimilarity = (keywords1, keywords2) => {
-  if (!keywords1 || !keywords2 || keywords1.length === 0 || keywords2.length === 0) {
-    return 0;
-  }
-  // 构建词袋模型
-  const allTerms = [...new Set([...keywords1, ...keywords2])];
-  // 构建向量
-  const vector1 = allTerms.map(term => keywords1.includes(term)? 1 : 0);
-  const vector2 = allTerms.map(term => keywords2.includes(term)? 1 : 0);
-  // 计算点积
-  const dotProduct = vector1.reduce((sum, value, index) => sum + (value * vector2[index]), 0);
-  // 计算向量长度
-  const magnitude1 = Math.sqrt(vector1.reduce((sum, value) => sum + (value * value), 0));
-  const magnitude2 = Math.sqrt(vector2.reduce((sum, value) => sum + (value * value), 0));
-  // 计算余弦相似度
-  return magnitude1 && magnitude2? dotProduct / (magnitude1 * magnitude2) : 0;
-};    

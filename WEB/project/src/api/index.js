@@ -23,7 +23,12 @@ const newsApi = {
   getLatestNews: (count) => request.get(`/news/latest/${count}`)
 };
 
-export default {
+export default {getIntelligentRecommendations() {
+    return request({
+      url: '/api/recommendations/intelligent',
+      method: 'get'
+    });
+  },
   activity: activityApi,
   auth: {
     login: (data) => request.post('/auth/login', data),

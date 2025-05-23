@@ -1,4 +1,7 @@
 import News from '../models/News.js';
+import NewsKeywords from '../models/NewsKeywords.js';
+import { successResponse, errorResponse } from '../utils/response.js';
+import { calculateNewsKeywords } from '../services/keywordService.js';
 
 export const createNews = async (req, res) => {
   try {
@@ -27,8 +30,18 @@ export const createNews = async (req, res) => {
       tags: req.body.tags,
       publishTime: req.body.publishTime || new Date()
     });
-
+    
     await newNews.save();
+
+    const keywords = calculateNewsKeywords(req.body.title,req.body.content,req.body.category);
+    console.log('提取的关键词:', keywords);
+    
+    await NewsKeywords.create({
+      newsId: newNews._id,
+      keywords : keywords
+    });
+
+    
 
     res.status(201).json({
       code: 200, // 自定义成功码

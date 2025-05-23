@@ -1,5 +1,7 @@
 // bishe10/BackEnd/controllers/activityController.js
 import Activity from '../models/Activity.js';
+import ActivityKeywords from '../models/ActivityKeywords.js';
+import { calculateActivityKeywords } from '../services/keywordService.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 export const createActivity = async (req, res) => {
@@ -46,6 +48,20 @@ export const createActivity = async (req, res) => {
       name,
       avatar
     });
+
+    console.log('标题:', title);
+    console.log('简介:', introduction);
+    console.log('内容:', content);
+
+    // 计算活动的关键词
+    const keywords = calculateActivityKeywords(title, introduction, content);
+
+    // 保存关键词到新模型中
+    await ActivityKeywords.create({
+      activityId: activity._id,
+      keywords
+    });
+
     successResponse(res, { activity }, '活动发布成功');
   } catch (error) {
     console.error('Error creating activity:', error); 

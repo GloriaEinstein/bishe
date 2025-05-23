@@ -70,8 +70,8 @@ export const postComment = async (req, res) => {
     const populatedComment = await Comment.findById(comment._id)
       .populate('user', 'name avatar');
     
-    res.status(201).json({
-      code: 201,
+    res.status(200).json({
+      code: 200,
       success: true,
       message: '评论发表成功',
       data: { comment: populatedComment }
