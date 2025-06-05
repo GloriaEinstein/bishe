@@ -218,42 +218,53 @@ export default {
       defaultAvatar: require('E:/1111AAAA/code/BackEnd/uploads/avatar/default-avatar.png'),
       uploadUrl: 'http://localhost:3000/api/users/uploadAvatar',
       collegeMajorMap,
-    }
+    };
   },
   computed: {
     ...mapState('user', ['userInfo']),
     headers() {
-      const token = localStorage.getItem('authToken')
+      const token = localStorage.getItem('authToken');
       return {
-        Authorization: `${token}`,
-      }
+        Authorization: `Bearer ${token}`,
+      };
     },
     currentMajors() {
       const majors = this.userInfo.user.college 
-        ? collegeMajorMap[this.userInfo.user.college] || []
+        ? this.collegeMajorMap[this.userInfo.user.college] || []
         : [];
       console.log('当前专业列表:', majors); // 调试用
       return majors;
-    }
+    },
+    currentAvatarUrl() {
+      if (this.userInfo && this.userInfo.user && this.userInfo.user.avatar) {
+        // 如果后端返回的路径已经是完整的 URL，直接返回
+        if (this.userInfo.user.avatar.startsWith('http')) {
+          return this.userInfo.user.avatar;
+        }
+        // 否则，拼接你的后端服务器基础 URL
+        return `http://localhost:3000${this.userInfo.user.avatar}`;
+      }
+      return this.defaultAvatar;
+    },
   },
   mounted() {
-    this.$store.dispatch('user/fetchUserInfo')
+    this.$store.dispatch('user/fetchUserInfo');
   },
   methods: {
     ...mapActions('user', ['updateProfile', 'logout']),
 
     handleCollegeChange() {
-      this.userInfo.user.major = '' // 清空已选专业
-      this.updateUser()
+      this.userInfo.user.major = ''; // 清空已选专业
+      this.updateUser();
     },
 
     async updateUser() {
       try {
         console.log('提交的用户信息:', this.userInfo.user);
-        await this.updateProfile(this.userInfo.user)
-        this.$message.success('资料更新成功')
+        await this.updateProfile(this.userInfo.user);
+        this.$message.success('资料更新成功');
       } catch (error) {
-        this.handleError(error)
+        this.handleError(error);
       }
     },
 
@@ -273,28 +284,39 @@ export default {
 
     async fetchUserInfo() {
       try {
-        const response = await api.get('/user/info', {
-          headers: this.headers
-        })
-        this.$store.commit('user/setUser', response.data.data)
+        const response = await this.$axios.get('/user/info', {
+          headers: this.headers,
+        });
+        this.$store.commit('user/setUser', response.data.data);
       } catch (error) {
-        this.handleError(error)
+        this.handleError(error);
       }
     },
 
     handleUploadSuccess(res) {
-      this.userInfo.user.avatar = res.data.avatar
-      this.$message.success('头像更新成功')
-      this.updateUser()
+      this.userInfo.user.avatar = res.data.avatar;
+      this.$message.success('头像更新成功');
+      this.updateUser();
+    },
+
+    handleUploadError(err) {
+      console.error('头像上传失败:', err);
+      let errorMessage = '头像上传失败，请检查网络或服务器。';
+      if (err && err.response && err.response.data && err.response.data.message) {
+        errorMessage = `头像上传失败: ${err.response.data.message}`;
+      } else if (err && err.message) { // Multer 错误可能直接在 err.message 中
+        errorMessage = `头像上传失败: ${err.message}`;
+      }
+      this.$message.error(errorMessage);
     },
 
     handleLogout() {
-      this.logout()
-      this.$message.success('退出登录成功！')
-      this.$router.push('/login')
-    }
-  }
-}
+      this.logout();
+      this.$message.success('退出登录成功！');
+      this.$router.push('/login');
+    },
+  },
+};
 </script>
 
 <style scoped>

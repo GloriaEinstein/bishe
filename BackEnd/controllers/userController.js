@@ -1,59 +1,94 @@
+// server/controllers/userController.js
 import User from '../models/User.js';
 import { successResponse, errorResponse } from '../utils/response.js';
-import { processAvatar } from '../services/upload.js';
+import { processAvatar } from '../services/upload.js'; // 确保这里导入的是 services/upload.js
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    // 假设 req.user._id 是认证中间件设置的用户 ID
+    const user = await User.findById(req.user._id).select('-password'); // 避免返回密码
+    if (!user) {
+      return errorResponse(res, 404, '用户不存在');
+    }
     successResponse(res, { user }, '获取用户信息成功');
   } catch (error) {
+    console.error('获取用户信息失败:', error); // 打印详细错误信息
     errorResponse(res, 500, '获取用户信息失败');
   }
 };
 
 export const updateProfile = async (req, res) => {
   try {
-    const { college, major, email } = req.body;
-    const updateData = {
-      ...req.body,
-      college,
-      major,
-      email
-    };
+    const { username, password, userType, createdAt, isVerified, ...updateData } = req.body; // 过滤掉不允许直接修改的字段
+    
+    // 确保只更新允许修改的字段
+    const allowedUpdates = ['name', 'studentId', 'college', 'major', 'email', 'signature'];
+    const actualUpdate = {};
+    Object.keys(updateData).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        actualUpdate[key] = updateData[key];
+      }
+    });
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { $set: updateData },
-      { new: true }
-    );
+      { $set: actualUpdate },
+      { new: true, runValidators: true } // 运行 Schema 验证器
+    ).select('-password'); // 避免返回密码
+
+    if (!user) {
+      return errorResponse(res, 404, '用户不存在');
+    }
     successResponse(res, { user }, '更新资料成功');
   } catch (error) {
+    console.error('更新资料失败:', error); // 打印详细错误信息
+    // 处理验证错误
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return errorResponse(res, 400, messages.join(', '));
+    }
     errorResponse(res, 500, '更新资料失败');
   }
 };
 
 export const uploadAvatar = async (req, res) => {
   try {
+    // Multer 配置在 uploadMiddleware.js 中处理了文件筛选和大小限制
+    // 如果没有文件，可能是 Multer 错误（会被全局错误处理捕获）或者前端没有发送文件
     if (!req.file) {
-      return errorResponse(res, 400, '请上传头像文件');
+      return errorResponse(res, 400, '没有文件上传或文件类型不正确。');
     }
 
-    const user = await User.findById(req.user._id);
-    const oldAvatarPath = user.avatar;
+    const userId = req.user._id; // 获取用户 ID
+    const user = await User.findById(userId);
 
-    const avatarPath = await processAvatar(req.file.buffer, req.user._id, oldAvatarPath);
+    if (!user) {
+      return errorResponse(res, 404, '用户不存在');
+    }
+
+    const oldAvatarPath = user.avatar; // 获取当前用户的旧头像路径
+
+    // 调用头像处理服务
+    const avatarPath = await processAvatar(req.file.buffer, userId, oldAvatarPath);
+
+    // 更新数据库中的头像路径
     const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
+      userId,
       { avatar: avatarPath },
       { new: true }
     );
 
     successResponse(res, { avatar: updatedUser.avatar }, '头像上传成功');
   } catch (error) {
-    errorResponse(res, 500, '头像上传失败');
+    console.error('头像上传失败:', error); // 打印详细错误信息
+    // 将错误传递给全局错误处理中间件
+    // 或者在这里根据错误类型返回更具体的错误信息
+    errorResponse(res, 500, '头像上传失败: ' + error.message);
   }
 };
 
-export const verifyUser = async (req, res) => {
+// 其他控制器函数保持不变
+export const verifyUser = async (req, res) => { 
   try {
     const { userId } = req.params;
     const user = await User.findByIdAndUpdate(
@@ -69,8 +104,7 @@ export const verifyUser = async (req, res) => {
     errorResponse(res, 500, '审核用户失败');
   }
 };
-
-export const getUnverifiedUsers = async (req, res) => {
+export const getUnverifiedUsers = async (req, res) => { 
   try {
     const users = await User.find({ 
       userType: { $in: ['schoolOrganization', 'offCampusOrganization'] },
@@ -81,8 +115,7 @@ export const getUnverifiedUsers = async (req, res) => {
     errorResponse(res, 500, '获取未审核用户列表失败');
   }
 };
-
-export const getUserByUsername = async (req, res) => {
+export const getUserByUsername = async (req, res) => { 
   try {
     const { username } = req.params;
     const user = await User.findOne({ username });
