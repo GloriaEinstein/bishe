@@ -215,7 +215,7 @@ export default {
   name: 'UserCenter',
   data() {
     return {
-      defaultAvatar: require('@/assets/default-avatar.png'),
+      defaultAvatar: require('E:/1111AAAA/code/BackEnd/uploads/avatar/default-avatar.png'),
       uploadUrl: 'http://localhost:3000/api/users/uploadAvatar',
       collegeMajorMap,
     }

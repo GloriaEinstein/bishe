@@ -79,6 +79,10 @@
           <i class="el-icon-s-platform"></i>
           <span>活动大厅</span>
         </el-menu-item>
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'admin'" index="/activity-review">
+          <i class="el-icon-check"></i>
+          <span>活动审核</span>
+        </el-menu-item>
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'admin'" index="/user-review">
           <i class="el-icon-check"></i>
           <span>用户审核</span>

@@ -1,6 +1,17 @@
 import express from 'express';
 import ActivityKeywords from '../models/ActivityKeywords.js';
-import { createActivity, getActivities, registerActivity, getLatestActivities, getActivityDetail, getRegisteredUsers, getActivityKeywords} from '../controllers/activityController.js';
+import { 
+  createActivity, 
+  getActivities, 
+  registerActivity, 
+  getLatestActivities, 
+  getActivityDetail, 
+  getRegisteredUsers, 
+  getActivityKeywords,
+  getPendingActivities,
+  approveActivity,
+  rejectActivity
+} from '../controllers/activityController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -19,11 +30,20 @@ router.get('/latest/:count', authMiddleware, getLatestActivities);
 
 router.get('/activity-keywords', getActivityKeywords);
 
-// 获取活动详情接口
-router.get('/:activityId', authMiddleware, getActivityDetail);
+
 
 router.get('/:activityId/registered-users', authMiddleware, getRegisteredUsers);
 
+// 获取待审核活动列表接口
+router.get('/pending', authMiddleware, getPendingActivities);
 
+// 审核通过活动接口
+router.put('/:activityId/approve', authMiddleware, approveActivity);
+
+// 审核拒绝活动接口
+router.put('/:activityId/reject', authMiddleware, rejectActivity);
+
+// 获取活动详情接口
+router.get('/:activityId', authMiddleware, getActivityDetail);
 
 export default router;

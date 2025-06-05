@@ -1,4 +1,3 @@
-// bishe10/BackEnd/models/Activity.js
 import mongoose from 'mongoose';
 
 const CounterSchema = new mongoose.Schema({
@@ -17,7 +16,7 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: [true, '活动标题不能为空'],
   },
-  introduction: { // 新增简介字段
+  introduction: { 
     type: String,
     required: [true, '活动简介不能为空'],
   },
@@ -72,6 +71,14 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: [true, '发布活动的用户头像不能为空']
   },
+  isPass: {
+    type: Boolean,
+    default: false
+  },
+  never: {
+    type: Boolean,
+    default: false
+  }
 });
 
 activitySchema.pre('save', async function(next) {
@@ -92,7 +99,7 @@ activitySchema.set('toJSON', {
   virtuals: true,
   versionKey: false,
   transform: (doc, ret) => {
-    ret.id = ret._id.toString(); // 将_id转换为字符串并重命名为id
+    ret.id = ret._id.toString(); 
     delete ret._id;
     return ret;
   }

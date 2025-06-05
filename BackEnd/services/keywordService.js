@@ -1,5 +1,6 @@
 // bishe44/BackEnd/services/keywordService/keywordService.js
 import { preprocessText, extractKeywordsFromSingleText } from '../services/wordProcessingService.js';
+import jieba from 'nodejieba'; 
 
 export const calculateActivityKeywords = (title, introduction, content) => {
   const allText = `${title} ${introduction} ${content}`;

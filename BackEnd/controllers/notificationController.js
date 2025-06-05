@@ -52,3 +52,19 @@ export const sendWarning = async (req, res) => {
   }
 };
 
+export const createRejectionNotification = async (username) => {
+  try {
+    // 创建一条拒绝通知
+    await Notification.create({
+      recipient: username,
+      content: '你发布的活动未通过审核',
+      type: 'rejection',
+      createdAt: new Date()
+    });
+    // 这里可以添加发送邮件或其他通知方式的逻辑
+    return true;
+  } catch (error) {
+    console.error('创建拒绝通知失败:', error);
+    return false;
+  }
+};

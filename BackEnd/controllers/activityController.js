@@ -1,8 +1,9 @@
-// bishe10/BackEnd/controllers/activityController.js
 import Activity from '../models/Activity.js';
 import ActivityKeywords from '../models/ActivityKeywords.js';
 import { calculateActivityKeywords } from '../services/keywordService.js';
 import { successResponse, errorResponse } from '../utils/response.js';
+import { createRejectionNotification } from './notificationController.js'; 
+
 
 export const createActivity = async (req, res) => {
   console.log('Received request body:', req.body); 
@@ -28,7 +29,6 @@ export const createActivity = async (req, res) => {
       projectStatus = '运行中';
     }
 
-    // 获取发布活动用户的username
     const username = req.user.username; 
     const name = req.user.name;
     const avatar = req.user.avatar;
@@ -53,10 +53,8 @@ export const createActivity = async (req, res) => {
     console.log('简介:', introduction);
     console.log('内容:', content);
 
-    // 计算活动的关键词
     const keywords = calculateActivityKeywords(title, introduction, content);
 
-    // 保存关键词到新模型中
     await ActivityKeywords.create({
       activityId: activity._id,
       keywords
@@ -88,11 +86,10 @@ export const registerActivity = async (req, res) => {
   }
 };
 
-
 export const getActivities = async (req, res) => {
   try {
     const { area, serviceType, projectStatus, serviceTarget, participantCount } = req.query;
-    const filter = {};
+    const filter = { isPass: true, never: false }; 
 
     if (area) filter.area = area;
     if (serviceType) filter.serviceType = serviceType;
@@ -129,21 +126,20 @@ export const getActivities = async (req, res) => {
 
 export const getLatestActivities = async (req, res) => {
   try {
-    const count = parseInt(req.params.count)
-    const activities = await Activity.find().sort({ createdAt: -1 }).limit(count)
-    successResponse(res, { activities }, '获取最新活动成功')
+    const count = parseInt(req.params.count);
+    const activities = await Activity.find({ isPass: true, never: false }).sort({ createdAt: -1 }).limit(count);
+    successResponse(res, { activities }, '获取最新活动成功');
   } catch (error) {
-    errorResponse(res, 500, '获取最新活动失败')
+    errorResponse(res, 500, '获取最新活动失败');
   }
-}
+};
 
 export const getActivityDetail = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.activityId)
-      // 新增：populate 报名用户的 name, username, college 字段
       .populate('registeredUsers', 'name username college'); 
-      
-    if (!activity) {
+    
+    if (!activity ||!activity.isPass || activity.never) {
       return errorResponse(res, 404, '活动未找到');
     }
     
@@ -157,9 +153,8 @@ export const getRegisteredUsers = async (req, res) => {
   try {
     const { activityId } = req.params;
     const activity = await Activity.findById(activityId)
-      // 新增：populate 报名用户的 name, username, college 字段
       .populate('registeredUsers', 'name username college'); 
-    if (!activity) {
+    if (!activity ||!activity.isPass || activity.never) {
       return errorResponse(res, 404, '活动未找到');
     }
     successResponse(res, { registeredUsers: activity.registeredUsers }, '获取已报名人员列表成功');
@@ -171,13 +166,56 @@ export const getRegisteredUsers = async (req, res) => {
 export const getActivityKeywords = async (req, res) => {
   try {
     const activityKeywords = await ActivityKeywords.find();
-    console.log('活动关键词:', ActivityKeywords); // 记录详细的关键词信息
+    console.log('活动关键词:', ActivityKeywords); 
     
     successResponse(res, { activityKeywords }, '获取活动关键词成功');
   } catch (error) {
-    console.error('获取活动关键词失败:', error); // 记录详细错误信息
+    console.error('获取活动关键词失败:', error); 
     errorResponse(res, 500, '获取活动关键词失败');
   }
 };
 
+export const getPendingActivities = async (req, res) => {
+  try {
+    const activities = await Activity.find({ isPass: false, never: false }); // 直接获取数组
+    successResponse(res, { activities }, '获取待审核活动列表成功');
+  } catch (error) {
+    console.error('Error fetching pending activities:', error); // 建议添加错误日志
+    errorResponse(res, 500, '获取待审核活动列表失败');
+  }
+};
 
+export const approveActivity = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const activity = await Activity.findByIdAndUpdate(
+      activityId,
+      { isPass: true },
+      { new: true }
+    );
+    if (!activity) {
+      return errorResponse(res, 404, '活动未找到');
+    }
+    successResponse(res, { activity }, '活动审核通过');
+  } catch (error) {
+    errorResponse(res, 500, '审核活动失败');
+  }
+};
+
+export const rejectActivity = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const activity = await Activity.findByIdAndUpdate(
+      activityId,
+      { never: true },
+      { new: true }
+    );
+    if (!activity) {
+      return errorResponse(res, 404, '活动未找到');
+    }
+    await createRejectionNotification(activity.username); // 使用正确的函数名
+    successResponse(res, { activity }, '活动审核拒绝');
+  } catch (error) {
+    errorResponse(res, 500, '审核活动失败');
+  }
+};

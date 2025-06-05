@@ -92,6 +92,11 @@ const router = new Router({
           path: '/volunteer-home',
           name: 'VolunteerHome',
           component: () => import('@/views/Home/VolunteerHome')
+        },
+        {
+          path:'/activity-review',
+          name: 'ActivityReview',
+          component: () => import('@/views/Home/ActivityReview'),
         }
         
       ]

@@ -13,9 +13,12 @@ const activityApi = {
   publish: (data) => request.post('/activity/publish', data),
   register: (activityId, data) => request.post(`/activity/${activityId}/register`, data),
   getLatestActivities: (count) => request.get(`/activity/latest/${count}`),
-  getDetail: (activityId) => request.get(`/activity/${activityId}`),
   getRegisteredUsers: (activityId) => request.get(`/activity/${activityId}/registered-users`),
-  getActivityKeywords: () => request.get('/activity/activity-keywords')
+  getActivityKeywords: () => request.get('/activity/activity-keywords'),
+  getPendingActivities: () => request.get('/activity/pending'),
+  approveActivity: (activityId) => request.put(`/activity/${activityId}/approve`),
+  rejectActivity: (activityId) => request.put(`/activity/${activityId}/reject`),
+  getDetail: (activityId) => request.get(`/activity/${activityId}`),
 };
 
 const newsApi = {
