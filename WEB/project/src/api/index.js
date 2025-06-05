@@ -41,11 +41,7 @@ export default {
     uploadAvatar: (file) => {
       const formData = new FormData();
       formData.append('avatar', file);
-      return request.post('/users/uploadAvatar', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      return request.post('/users/uploadAvatar', formData);
     },
     getUnverifiedUsers: () => request.get('/users/unverified'),
     verifyUser: (userId) => request.put(`/users/verify/${userId}`),

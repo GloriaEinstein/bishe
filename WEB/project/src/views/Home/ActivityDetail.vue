@@ -69,7 +69,7 @@
               <div class="post-comment-area">
                 <div class="comment-avatar">
                   <el-image 
-                    :src="userAvatar" 
+                    :src="defaultAvatar" 
                     fit="cover" 
                     class="avatar"
                   ></el-image>
@@ -99,7 +99,7 @@
                 <div v-for="comment in comments" :key="comment._id" class="comment-item">
                   <div class="comment-avatar">
                     <el-image 
-                      :src="comment.user.avatar" 
+                      :src="defaultAvatar" 
                       fit="cover" 
                       class="avatar"
                     ></el-image>
@@ -134,7 +134,7 @@
             项目发起人
           </h2>
           <el-image 
-            :src="activity.avatar" 
+            :src="defaultAvatar" 
             fit="cover" 
             class="avatar wood-frame"
           ></el-image>
@@ -184,7 +184,6 @@ export default {
         endTime: '',
         serviceTarget: '',
         content: '',
-        avatar: '@/assets/default-avatar.png',
         organizationName: '',
         registeredUsers: []
       },
@@ -195,7 +194,7 @@ export default {
         content: ''
       },
       comments: [],
-      userAvatar: '@/assets/default-user-avatar.png' // 默认用户头像
+      defaultAvatar: require('@/assets/default-avatar.png'),
     }
   },
   computed: {
@@ -232,13 +231,22 @@ export default {
         await api.activity.register(activityId, { userId });
         this.$message.success('报名成功');
         this.fetchActivityDetail(activityId);
-      } catch (error) {
+      } catch (error) { 
         this.$message.error('报名失败');
       }
     },
     isRegistered(activity) {
       const userId = this.$store.state.user.userInfo.user._id;
-      return activity.registeredUsers.some(user => user.id === userId);
+      const registeredUsers = this.registeredUsers;
+      
+      for (let i = 0; i < registeredUsers.length; i++) {
+        const user = registeredUsers[i];
+        if (user._id === userId) {
+          return true;
+        }
+      }
+      
+      return false;
     },
     async fetchActivityDetail(activityId) {
       try {

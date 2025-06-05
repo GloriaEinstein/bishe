@@ -6,7 +6,7 @@
 
       <div class="avatar-section" v-if="userInfo">
         <el-image
-          :src="userInfo.user.avatar || defaultAvatar"
+          :src="defaultAvatar"
           fit="cover"
           class="avatar"
         />
@@ -16,7 +16,7 @@
           :show-file-list="false"
           :on-success="handleUploadSuccess"
         >
-          <el-button type="primary" size="small">更换头像</el-button>
+          <!-- <el-button type="primary" size="small">更换头像</el-button> -->
         </el-upload>
       </div>
 
@@ -215,7 +215,7 @@ export default {
   name: 'UserCenter',
   data() {
     return {
-      defaultAvatar: require('E:/1111AAAA/code/BackEnd/uploads/avatar/default-avatar.png'),
+      defaultAvatar: require('@/assets/default-avatar.png'),
       uploadUrl: 'http://localhost:3000/api/users/uploadAvatar',
       collegeMajorMap,
     };
@@ -234,17 +234,6 @@ export default {
         : [];
       console.log('当前专业列表:', majors); // 调试用
       return majors;
-    },
-    currentAvatarUrl() {
-      if (this.userInfo && this.userInfo.user && this.userInfo.user.avatar) {
-        // 如果后端返回的路径已经是完整的 URL，直接返回
-        if (this.userInfo.user.avatar.startsWith('http')) {
-          return this.userInfo.user.avatar;
-        }
-        // 否则，拼接你的后端服务器基础 URL
-        return `http://localhost:3000${this.userInfo.user.avatar}`;
-      }
-      return this.defaultAvatar;
     },
   },
   mounted() {
