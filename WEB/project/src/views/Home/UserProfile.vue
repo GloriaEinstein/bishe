@@ -1,39 +1,38 @@
-<!-- WEB/project/src/views/Home/UserProfile.vue -->
 <template>
+  <!-- 模板部分 - 使用 ElementUI 的 Tooltip 替代自定义组件 -->
   <div class="user-profile">
-    <!-- 头部区域 -->
     <header class="profile-header">
       <h1 class="gradient-title">用户兴趣画像</h1>
       <p class="subtitle">基于您的近期行为数据分析生成</p>
       <div class="decorative-line"></div>
     </header>
 
-    <!-- 数据看板 -->
     <div class="data-panel">
-      <!-- 加载状态 -->
       <div v-if="isLoading" class="loading-overlay">
         <div class="loader"></div>
       </div>
 
-      <!-- 词云卡片 -->
       <div class="card wordcloud-card">
         <div class="card-header">
           <i class="icon icon-chart"></i>
-          <h3>关键词词云</h3>
-          <tooltip-icon content="根据您的搜索和浏览记录生成"></tooltip-icon>
+          <h3>核心兴趣词云</h3>
+          <!-- 使用 ElementUI 的 Tooltip 组件 -->
+          <el-tooltip content="基于高权重关键词生成，过滤低效数据" placement="top">
+            <i class="el-icon-question"></i>
+          </el-tooltip>
         </div>
         <div id="wordcloud" class="chart-container"></div>
       </div>
 
-      <!-- 右侧统计面板 -->
+      <!-- 其余模板部分保持不变 -->
       <div class="stats-panel">
         <div class="stat-item">
           <div class="stat-icon">
             <i class="icon icon-tag"></i>
           </div>
           <div class="stat-content">
-            <div class="stat-value">128</div>
-            <div class="stat-label">兴趣标签</div>
+            <div class="stat-value">{{ filteredTagsCount }}</div>
+            <div class="stat-label">有效兴趣标签</div>
           </div>
         </div>
         <div class="stat-item highlighted">
@@ -41,8 +40,16 @@
             <i class="icon icon-trend"></i>
           </div>
           <div class="stat-content">
-            <div class="stat-value">+23%</div>
-            <div class="stat-label">科技类兴趣增长</div>
+            <div 
+              class="stat-value" 
+              :class="{ 
+                positive: interestGrowthRate > 0,
+                negative: interestGrowthRate < 0 
+              }"
+            >
+              {{ interestGrowthRateFormatted }}
+            </div>
+            <div class="stat-label">兴趣增长率</div>
           </div>
         </div>
       </div>
@@ -54,58 +61,101 @@
 import api from '@/api';
 import * as echarts from 'echarts';
 import 'echarts-wordcloud';
+import { removeStopwords } from 'stopword';
 
 export default {
   data() {
     return {
       wordcloudData: [],
-      isLoading: true // 新增加载状态
+      isLoading: true,
+      filteredTagsCount: 0,
+      interestGrowthRate: 0,
     };
+  },
+  computed: {
+    interestGrowthRateFormatted() {
+      // 确保数值有效性
+      const rate = parseFloat(this.interestGrowthRate);
+      return isNaN(rate) ? '0.0%' : `${rate >= 0 ? '+' : ''}${rate.toFixed(1)}%`;
+    }
   },
   async mounted() {
     try {
-      this.isLoading = true; // 开始加载
+      this.isLoading = true;
       const userId = this.$store.state.user.userInfo.user._id;
+      
       const { data } = await api.user.getUserDataForWordCloud(userId);
-      const words = this.processText(data.text);
-      const wordCount = {};
-      words.forEach(word => {
-        if (word.trim()) {
-          wordCount[word] = (wordCount[word] || 0) + 1;
-        }
-      });
-      this.wordcloudData = Object.keys(wordCount).map(word => ({
-        name: word,
-        value: wordCount[word]
-      }));
+      const rawWords = data.text.split(' ');
+
+      this.$store.commit('userAnalysis/UPDATE_KEYWORDS', { userId, keywords: rawWords });
+
+      const processedData = this.processKeywords(rawWords);
+      
+      this.wordcloudData = processedData.filteredKeywords;
+      this.filteredTagsCount = processedData.uniqueCount;
+      
+      // 确保获取的增长率是有效数值
+      const growthRate = this.$store.getters['userAnalysis/getGrowthRate'](userId);
+      this.interestGrowthRate = parseFloat(growthRate) || 0;
+      
       this.drawWordCloud();
     } catch (error) {
-      console.error('获取数据失败', error);
+      console.error('数据获取失败', error);
     } finally {
-      this.isLoading = false; // 确保加载状态关闭
+      this.isLoading = false;
     }
   },
   methods: {
-    processText(text) {
-      return text.split(' ');
+    processKeywords(rawWords) {
+      // 保持原有方法不变...
+      const cleanedWords = rawWords
+        .map(word => word.trim())
+        .filter(word => 
+          word.length >= 2 &&
+          !/\d/.test(word)
+        );
+
+      const filteredWords = removeStopwords(cleanedWords);
+
+      const wordFrequency = filteredWords.reduce((acc, word) => {
+        acc[word] = (acc[word] || 0) + 1;
+        return acc;
+      }, {});
+
+      const filteredEntries = Object.entries(wordFrequency)
+        .filter(([, count]) => count >= 2);
+
+      return {
+        filteredKeywords: filteredEntries
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, value]) => ({ name, value })),
+        uniqueCount: new Set(filteredEntries.map(([name]) => name)).size
+      };
     },
+
     drawWordCloud() {
       const chart = echarts.init(document.getElementById('wordcloud'));
+      
+      // 修复扩展运算符兼容性问题
+      const values = this.wordcloudData.map(d => d.value);
+      const maxSize = values.length > 0 ? Math.max.apply(null, values) : 10;
+      
       const option = {
         series: [{
           type: 'wordCloud',
           shape: 'circle',
-          sizeRange: [12, 60],
-          rotationRange: [-90, 90],
+          sizeRange: [20, Math.min(80, maxSize * 15)],
+          rotationRange: [-45, 45],
+          gridSize: 8,
+          drawOutOfBound: false,
           textStyle: {
-            normal: {
-              color: () => `rgb(${[
-                Math.round(Math.random() * 160),
-                Math.round(Math.random() * 160),
-                Math.round(Math.random() * 160)
-              ].join(',')})`
-            },
-            emphasis: {
+            fontFamily: 'sans-serif',
+            fontWeight: 'bold',
+            color: () => `hsl(${Math.random() * 360}, 70%, 50%)`
+          },
+          emphasis: {
+            focus: 'self',
+            textStyle: {
               shadowBlur: 10,
               shadowColor: '#333'
             }
@@ -113,13 +163,37 @@ export default {
           data: this.wordcloudData
         }]
       };
+      
       chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
     }
   }
 };
 </script>
 
 <style scoped>
+/* 样式部分保持不变 */
+.positive { color: #27ae60; }
+.negative { color: #e74c3c; }
+
+/* 优化统计面板 */
+.stat-value {
+  font-size: 1.8rem;
+  transition: color 0.3s;
+}
+
+.highlighted .stat-value {
+  font-size: 2rem;
+}
+
+/* 优化词云容器 */
+.chart-container {
+  height: 520px;
+  background: #f8fafb;
+  border-radius: 12px;
+  margin: 1rem;
+}
+
 .user-profile {
   padding: 2rem;
   background: linear-gradient(135deg, #fafcff 0%, #f0f4fa 100%);

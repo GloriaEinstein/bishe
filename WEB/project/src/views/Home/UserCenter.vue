@@ -1,7 +1,7 @@
 <template>
   <div class="user-center">
     <el-card>
-      <h2>用户中心</h2>
+      <h2>个人中心</h2>
       <el-divider />
 
       <div class="avatar-section" v-if="userInfo">

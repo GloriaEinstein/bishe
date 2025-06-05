@@ -1,6 +1,6 @@
 <template>
   <div class="activity-hall">
-    <h2>活动大厅</h2>
+    <h2>志愿服务项目</h2>
     <!-- 筛选表单 -->
     <el-form :model="filterForm" inline @submit.prevent="handleFilter">
       <el-form-item label="活动区域">

@@ -1,7 +1,7 @@
 <template>
   <el-container class="home-container">
     <el-aside width="200px" class="sidebar">
-      <div class="logo">志愿者管理平台</div>
+      <div class="logo">大学生志愿者管理平台</div>
       <el-menu
         :default-active="activeMenu"
         router
@@ -14,11 +14,11 @@
         </el-menu-item>
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/user-center">
           <i class="el-icon-user"></i>
-          <span>用户中心</span>
+          <span>个人中心</span>
         </el-menu-item>
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/activity-hall">
           <i class="el-icon-s-platform"></i>
-          <span>活动大厅</span>
+          <span>志愿服务项目</span>
         </el-menu-item>
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'volunteer'" index="/user-profile">
           <i class="el-icon-s-custom"></i>

@@ -91,7 +91,7 @@ export const extractKeywords = (texts, topN = 20) => {
   return topKeywords.map(item => item.term);
 };
 
-// 2. 基于 TF-IDF 提取关键词（单文本场景）
+// 基于 TF-IDF 提取关键词（单文本场景）
 export const extractKeywordsFromSingleText = (text) => {
   if (!text) return [];
   
