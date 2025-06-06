@@ -10,7 +10,7 @@ import {
   getPendingActivities,
   approveActivity,
   rejectActivity,
-  getPublishedActivities
+  getPublishedActivities // 确保已导入
 } from '../controllers/activityController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -41,9 +41,7 @@ router.put('/:activityId/approve', authMiddleware, approveActivity);
 // 审核拒绝活动接口
 router.put('/:activityId/reject', authMiddleware, rejectActivity);
 
-
-
-// 获取校组织发布的活动列表
+// 获取校组织发布的活动列表 (修改这里，不再是路径参数)
 router.get('/published', authMiddleware, getPublishedActivities);
 
 // 获取活动详情接口

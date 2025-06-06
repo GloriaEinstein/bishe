@@ -227,8 +227,7 @@ export const getPublishedActivities = async (req, res) => {
     
     // 使用username查询活动
     const activities = await Activity.find({ username });
-    
-    res.status(200).json({ activities });
+    successResponse(res, { activities }, '获取活动关键词成功');
   } catch (error) {
     res.status(500).json({ message: '获取活动列表失败', error: error.message });
   }

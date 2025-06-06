@@ -82,141 +82,123 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'; //
-import api from '@/api'; // Assuming you have an api module to handle API requests
+import { mapState } from 'vuex';
+import api from '@/api';
 
 export default {
-  name: 'ActivityCertification', //
+  name: 'ActivityCertification',
   data() {
     return {
-      activities: [], //
-      total: 0, //
-      currentPage: 1, //
-      pageSize: 10, //
+      activities: [],
+      total: 0,
+      currentPage: 1,
+      pageSize: 10,
       filterForm: {
-        title: '', //
-        projectStatus: '' // Changed from 'status' to 'projectStatus' to match backend
+        title: '',
+        projectStatus: ''
       },
-      loading: false //
+      loading: false,
+      username: ''
     };
   },
-  computed: {
-    ...mapState('user', ['currentUser']), //
-    username() {
-      return this.currentUser?.username || ''; //
-    }
-  },
-  created() {
-    this.fetchActivities(); //
+  async mounted() {
+    this.username = this.$store.state.user.userInfo.user.username;
+    console.log('当前用户名:', this.username);
+    
+    await this.fetchActivities();
   },
   methods: {
     async fetchActivities() {
-      this.loading = true; //
+      this.loading = true;
       try {
         const params = {
-          username: this.username, //
-
+          username: this.username,
+          title: this.filterForm.title,
+          projectStatus: this.filterForm.projectStatus,
+          page: this.currentPage,
+          limit: this.pageSize
         };
 
-        const { data } = await this.$api.activity.getPublishedActivities(params); //
-        // Assuming the backend returns an object like { activities: [...], total: ... }
-        // If not, you might need to adjust `data.activities` and `data.total`.
-        this.activities = data.activities || []; //
-        this.total = data.activities ? data.activities.length : 0; // The provided backend `getPublishedActivities` doesn't return `total`. Assuming `activities.length`.
-                                                                   // If pagination is added to the backend, this `total` needs to come from the backend response.
-
-        // Client-side filtering if backend doesn't support it for getPublishedActivities
-        let filteredActivities = data.activities || [];
-        if (this.filterForm.title) {
-          filteredActivities = filteredActivities.filter(activity =>
-            activity.title.includes(this.filterForm.title)
-          );
-        }
-        if (this.filterForm.projectStatus) {
-          filteredActivities = filteredActivities.filter(activity =>
-            activity.projectStatus === this.filterForm.projectStatus
-          );
-        }
-
-        // Client-side pagination if backend doesn't support it for getPublishedActivities
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = startIndex + this.pageSize;
-        this.activities = filteredActivities.slice(startIndex, endIndex);
-        this.total = filteredActivities.length;
-
+        // 直接从 response 中获取数据，因为后端没有 success/code/message 字段
+        const response = await api.activity.getPublishedActivities(params);
+        
+        // 确保 response.activities 存在且是数组
+        this.activities = response.data.activities || []; // 修改这里，直接从 response 中获取 activities
+        
+        this.total = this.activities.length; // 根据获取到的活动数组长度设置总数
 
       } catch (error) {
         this.$message.error('获取活动列表失败');
-        console.error(error); //
+        console.error(error);
       } finally {
-        this.loading = false; //
+        this.loading = false;
       }
     },
 
     async handleCertify(activity, event) {
-      event.stopPropagation(); //
+      event.stopPropagation();
       this.$router.push({
-        name: 'ActivityCertificationDetail', //
-        params: { activityId: activity._id } //
+        name: 'ActivityCertificationDetail',
+        params: { activityId: activity.id }
       });
     },
 
     formatDate(dateString) {
-      if (!dateString) return ''; //
-      const date = new Date(dateString); //
-      return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`; //
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
     },
 
-    getStatusText(projectStatus) { // Changed parameter to projectStatus
+    getStatusText(projectStatus) {
       switch (projectStatus) {
-        case '待启动': return '待启动'; // Matches backend enum
-        case '运行中': return '运行中'; // Matches backend enum
-        case '已结项': return '已结项'; // Matches backend enum
-        default: return projectStatus; //
+        case '待启动': return '待启动';
+        case '运行中': return '运行中';
+        case '已结项': return '已结项';
+        default: return projectStatus;
       }
     },
 
-    getStatusType(projectStatus) { // Changed parameter to projectStatus
+    getStatusType(projectStatus) {
       switch (projectStatus) {
-        case '待启动': return 'info'; //
-        case '运行中': return 'success'; //
-        case '已结项': return 'warning'; //
-        default: return 'default'; //
+        case '待启动': return 'info';
+        case '运行中': return 'success';
+        case '已结项': return 'warning';
+        default: return 'default';
       }
     },
 
     handleFilter() {
-      this.currentPage = 1; //
-      this.fetchActivities(); //
+      this.currentPage = 1;
+      this.fetchActivities();
     },
 
     resetFilter() {
       this.filterForm = {
-        title: '', //
-        projectStatus: '' //
+        title: '',
+        projectStatus: ''
       };
-      this.currentPage = 1; //
-      this.fetchActivities(); //
+      this.currentPage = 1;
+      this.fetchActivities();
     },
 
     handleSizeChange(newSize) {
-      this.pageSize = newSize; //
-      this.fetchActivities(); //
+      this.pageSize = newSize;
+      this.fetchActivities();
     },
 
     handleCurrentChange(newPage) {
-      this.currentPage = newPage; //
-      this.fetchActivities(); //
+      this.currentPage = newPage;
+      this.fetchActivities();
     },
 
     refreshActivities() {
-      this.resetFilter(); //
+      this.resetFilter();
     },
 
     handleActivityClick(row) {
       this.$router.push({
         name: 'ActivityDetail',
-        params: { id: row._id }
+        params: { id: row.id }
       });
     }
   }

@@ -18,7 +18,7 @@ const activityApi = {
   getPendingActivities: () => request.get('/activity/pending'),
   approveActivity: (activityId) => request.put(`/activity/${activityId}/approve`),
   rejectActivity: (activityId) => request.put(`/activity/${activityId}/reject`),
-  getPublishedActivities: () => request.get('/activity/published'),
+  getPublishedActivities: (params) => request.get('/activity/published', { params }), // 修改这里
   getRegisteredUsers: (activityId) => request.get(`/activity/${activityId}/registered-users`),
   getDetail: (activityId) => request.get(`/activity/${activityId}`),
 };
