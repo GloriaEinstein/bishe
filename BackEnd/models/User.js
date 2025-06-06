@@ -58,7 +58,12 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  outstandingActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }]
+  outstandingActivities: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Activity'
+    }
+  ]
 });
 
 // 密码加密中间件

@@ -49,6 +49,13 @@ const activitySchema = new mongoose.Schema({
       ref: 'User'
     }
   ],
+  // 新增的 certifiedUsers 字段，用于存储被认证为优秀的用户ID
+  certifiedUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now
@@ -83,12 +90,14 @@ const activitySchema = new mongoose.Schema({
 
 activitySchema.pre('save', async function(next) {
   try {
-    const counter = await Counter.findOneAndUpdate(
-      { _id: 'activity_aID' },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    this.aID = counter.seq;
+    if (this.isNew) { // Only increment on new document creation
+      const counter = await Counter.findOneAndUpdate(
+        { _id: 'activity_aID' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      this.aID = counter.seq;
+    }
     next();
   } catch (error) {
     next(error);

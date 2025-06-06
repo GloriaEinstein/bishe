@@ -1,20 +1,21 @@
+// server/controllers/activityController.js
 import Activity from '../models/Activity.js';
 import ActivityKeywords from '../models/ActivityKeywords.js';
 import { calculateActivityKeywords } from '../services/keywordService.js';
 import { successResponse, errorResponse } from '../utils/response.js';
-import { createRejectionNotification } from './notificationController.js'; 
+import { createRejectionNotification } from './notificationController.js';
 
 
 export const createActivity = async (req, res) => {
-  console.log('Received request body:', req.body); 
+  console.log('Received request body:', req.body);
   try {
-    const { 
-      title, 
-      introduction, 
-      content, 
-      activityArea, 
-      serviceType, 
-      serviceTarget, 
+    const {
+      title,
+      introduction,
+      content,
+      activityArea,
+      serviceType,
+      serviceTarget,
       participantCount,
       startTime,
       endTime
@@ -29,18 +30,18 @@ export const createActivity = async (req, res) => {
       projectStatus = '运行中';
     }
 
-    const username = req.user.username; 
+    const username = req.user.username;
     const name = req.user.name;
     const avatar = req.user.avatar;
 
-    const activity = await Activity.create({ 
-      title, 
-      introduction, 
-      content, 
-      activityArea, 
-      serviceType, 
-      projectStatus, 
-      serviceTarget, 
+    const activity = await Activity.create({
+      title,
+      introduction,
+      content,
+      activityArea,
+      serviceType,
+      projectStatus,
+      serviceTarget,
       participantCount,
       startTime,
       endTime,
@@ -62,7 +63,7 @@ export const createActivity = async (req, res) => {
 
     successResponse(res, { activity }, '活动发布成功');
   } catch (error) {
-    console.error('Error creating activity:', error); 
+    console.error('Error creating activity:', error);
     errorResponse(res, 500, '活动发布失败');
   }
 };
@@ -75,6 +76,7 @@ export const registerActivity = async (req, res) => {
     if (!activity) {
       return errorResponse(res, 404, '活动未找到');
     }
+    // 检查用户是否已报名
     if (activity.registeredUsers.includes(userId)) {
       return errorResponse(res, 400, '你已经报名该活动');
     }
@@ -89,7 +91,7 @@ export const registerActivity = async (req, res) => {
 export const getActivities = async (req, res) => {
   try {
     const { area, serviceType, projectStatus, serviceTarget, participantCount } = req.query;
-    const filter = { isPass: true, never: false }; 
+    const filter = { isPass: true, never: false };
 
     if (area) filter.area = area;
     if (serviceType) filter.serviceType = serviceType;
@@ -116,7 +118,7 @@ export const getActivities = async (req, res) => {
       } else {
         activity.projectStatus = '运行中';
       }
-      activity.save();
+      // activity.save(); // 依然不在这里保存，避免重复写数据库
     });
     successResponse(res, { activities }, '获取活动列表成功');
   } catch (error) {
@@ -137,12 +139,13 @@ export const getLatestActivities = async (req, res) => {
 export const getActivityDetail = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.activityId)
-      .populate('registeredUsers', 'name username college'); 
-    
+      .populate('registeredUsers', 'name username college'); // 只需要registeredUsers
+    // 不需要 populate certifiedUsers 了，因为它不在 Activity 模型中
+
     if (!activity ||!activity.isPass || activity.never) {
       return errorResponse(res, 404, '活动未找到');
     }
-    
+
     successResponse(res, { activity }, '获取活动详情成功');
   } catch (error) {
     errorResponse(res, 500, '获取活动详情失败');
@@ -153,7 +156,7 @@ export const getRegisteredUsers = async (req, res) => {
   try {
     const { activityId } = req.params;
     const activity = await Activity.findById(activityId)
-      .populate('registeredUsers', 'name username college'); 
+      .populate('registeredUsers', 'name username college');
     if (!activity ||!activity.isPass || activity.never) {
       return errorResponse(res, 404, '活动未找到');
     }
@@ -163,24 +166,31 @@ export const getRegisteredUsers = async (req, res) => {
   }
 };
 
+// !!! 移除 getCertifiedUsers，因为优秀用户不再存储在 Activity 模型中 !!!
+// export const getCertifiedUsers = async (req, res) => { ... };
+
+// !!! 移除 certifyUsersForActivity，因为认证逻辑现在在 userController.js 中 !!!
+// export const certifyUsersForActivity = async (req, res) => { ... };
+
+
 export const getActivityKeywords = async (req, res) => {
   try {
     const activityKeywords = await ActivityKeywords.find();
-    console.log('活动关键词:', ActivityKeywords); 
-    
+    console.log('活动关键词:', ActivityKeywords);
+
     successResponse(res, { activityKeywords }, '获取活动关键词成功');
   } catch (error) {
-    console.error('获取活动关键词失败:', error); 
+    console.error('获取活动关键词失败:', error);
     errorResponse(res, 500, '获取活动关键词失败');
   }
 };
 
 export const getPendingActivities = async (req, res) => {
   try {
-    const activities = await Activity.find({ isPass: false, never: false }); // 直接获取数组
+    const activities = await Activity.find({ isPass: false, never: false });
     successResponse(res, { activities }, '获取待审核活动列表成功');
   } catch (error) {
-    console.error('Error fetching pending activities:', error); // 建议添加错误日志
+    console.error('Error fetching pending activities:', error);
     errorResponse(res, 500, '获取待审核活动列表失败');
   }
 };
@@ -213,7 +223,7 @@ export const rejectActivity = async (req, res) => {
     if (!activity) {
       return errorResponse(res, 404, '活动未找到');
     }
-    await createRejectionNotification(activity.username); // 使用正确的函数名
+    await createRejectionNotification(activity.username);
     successResponse(res, { activity }, '活动审核拒绝');
   } catch (error) {
     errorResponse(res, 500, '审核活动失败');
@@ -222,13 +232,40 @@ export const rejectActivity = async (req, res) => {
 
 export const getPublishedActivities = async (req, res) => {
   try {
-    // 直接从查询参数获取username
-    const { username } = req.query;
-    
-    // 使用username查询活动
-    const activities = await Activity.find({ username });
-    successResponse(res, { activities }, '获取活动关键词成功');
+    const { username, title, projectStatus, page = 1, limit = 10 } = req.query;
+
+    const filter = { username: username, isPass: true, never: false }; // 重新添加 username 过滤
+
+    if (title) {
+      filter.title = { $regex: title, $options: 'i' };
+    }
+    if (projectStatus && projectStatus !== '全部') {
+      filter.projectStatus = projectStatus;
+    }
+
+    const activities = await Activity.find(filter)
+                                      .skip((page - 1) * limit)
+                                      .limit(parseInt(limit))
+                                      .sort({ createdAt: -1 });
+
+    const total = await Activity.countDocuments(filter);
+
+    const now = new Date();
+    activities.forEach(activity => {
+      const startTime = new Date(activity.startTime);
+      const endTime = new Date(activity.endTime);
+      if (now < startTime) {
+        activity.projectStatus = '待启动';
+      } else if (now >= startTime && now <= endTime) {
+        activity.projectStatus = '运行中';
+      } else {
+        activity.projectStatus = '已结项';
+      }
+    });
+
+    successResponse(res, { activities, total }, '获取活动列表成功'); // 修正了这里的message
   } catch (error) {
-    res.status(500).json({ message: '获取活动列表失败', error: error.message });
+    console.error('Error fetching published activities:', error);
+    errorResponse(res, 500, '获取活动列表失败');
   }
 };
