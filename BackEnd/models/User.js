@@ -57,7 +57,8 @@ const userSchema = new mongoose.Schema({
   isVerified: {
     type: Boolean,
     default: false
-  }
+  },
+  outstandingActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }]
 });
 
 // 密码加密中间件

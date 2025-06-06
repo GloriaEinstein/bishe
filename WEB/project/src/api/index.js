@@ -18,6 +18,8 @@ const activityApi = {
   getPendingActivities: () => request.get('/activity/pending'),
   approveActivity: (activityId) => request.put(`/activity/${activityId}/approve`),
   rejectActivity: (activityId) => request.put(`/activity/${activityId}/reject`),
+  getPublishedActivities: () => request.get('/activity/published'),
+  getRegisteredUsers: (activityId) => request.get(`/activity/${activityId}/registered-users`),
   getDetail: (activityId) => request.get(`/activity/${activityId}`),
 };
 
@@ -46,7 +48,8 @@ export default {
     getUnverifiedUsers: () => request.get('/users/unverified'),
     verifyUser: (userId) => request.put(`/users/verify/${userId}`),
     getUserByUsername: (username) => request.get(`/user/by-username/${username}`),
-    getUserDataForWordCloud: (userId) => request.get(`/user-analysis/user-data-for-wordcloud/${userId}`)
+    getUserDataForWordCloud: (userId) => request.get(`/user-analysis/user-data-for-wordcloud/${userId}`),
+    certifyUserAsOutstanding: (userId, activityId) => request.post(`/user/${userId}/certify-outstanding`, { activityId })
   },
   notification: {
     publish: (data) => request.post('/notifications/publish', data),

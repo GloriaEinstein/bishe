@@ -2,13 +2,28 @@
 import Notification from '../models/Notification.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
-export const createNotification = async (req, res) => {
+export const createNotification = async ({
+  userId,
+  message,
+  type = 'general',
+  relatedActivity = null,
+  relatedUser = null
+}) => {
   try {
-    const { title, content } = req.body;
-    const notification = await Notification.create({ title, content });
-    successResponse(res, { notification }, '通知发布成功');
+    const notification = new Notification({
+      userId,
+      message,
+      type,
+      relatedActivity,
+      relatedUser,
+      read: false,
+      createdAt: new Date()
+    });
+    
+    await notification.save();
+    return notification;
   } catch (error) {
-    errorResponse(res, 500, '通知发布失败');
+    throw new Error(`创建通知失败: ${error.message}`);
   }
 };
 

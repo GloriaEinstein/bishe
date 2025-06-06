@@ -69,6 +69,10 @@
           <i class="el-icon-edit"></i>
           <span>新闻发布</span>
         </el-menu-item>
+        <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'schoolOrganization'" index="/outstanding-certification">
+          <i class="el-icon-medal"></i>
+          <span>优秀认证</span>
+        </el-menu-item>
 
         <!-- 管理员菜单项 -->
         <el-menu-item v-if="hasUserInfo && userInfo.user.userType === 'admin'" index="/user-center">

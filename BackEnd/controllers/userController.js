@@ -2,6 +2,7 @@
 import User from '../models/User.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { processAvatar } from '../services/upload.js'; // 确保这里导入的是 services/upload.js
+import { createNotification } from './notificationController.js'; 
 
 export const getProfile = async (req, res) => {
   try {
@@ -125,5 +126,36 @@ export const getUserByUsername = async (req, res) => {
     res.status(200).json({ user });
   } catch (error) {
     res.status(500).json({ message: '服务器错误', error: error.message });
+  }
+};
+
+export const certifyUserAsOutstanding = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { activityId } = req.body;
+    const publisherId = req.user._id; // 当前操作的校组织用户ID
+
+    // 标记用户为优秀
+    const user = await User.findByIdAndUpdate(
+      userId, 
+      { $addToSet: { outstandingActivities: activityId } }, 
+      { new: true }
+    );
+
+    // 获取活动信息
+    const activity = await Activity.findById(activityId);
+    
+    // 使用现有的通知创建方法发送通知
+    await createNotification({
+      userId,
+      message: `你在活动 "${activity.title}" 中被 ${req.user.username}（${req.user.userType}）认证为优秀！`,
+      type: 'outstanding-certification', // 添加通知类型
+      relatedActivity: activityId,
+      relatedUser: publisherId
+    });
+
+    res.status(200).json({ message: '认证成功' });
+  } catch (error) {
+    res.status(500).json({ message: '认证失败', error: error.message });
   }
 };

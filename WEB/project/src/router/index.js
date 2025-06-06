@@ -97,6 +97,11 @@ const router = new Router({
           path:'/activity-review',
           name: 'ActivityReview',
           component: () => import('@/views/Home/ActivityReview'),
+        },
+        {
+          path:'/outstanding-certification',
+          name: 'OutstandingCertification',
+          component: () => import('@/views/Home/OutstandingCertification'),
         }
         
       ]

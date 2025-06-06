@@ -219,3 +219,17 @@ export const rejectActivity = async (req, res) => {
     errorResponse(res, 500, '审核活动失败');
   }
 };
+
+export const getPublishedActivities = async (req, res) => {
+  try {
+    // 直接从查询参数获取username
+    const { username } = req.query;
+    
+    // 使用username查询活动
+    const activities = await Activity.find({ username });
+    
+    res.status(200).json({ activities });
+  } catch (error) {
+    res.status(500).json({ message: '获取活动列表失败', error: error.message });
+  }
+};

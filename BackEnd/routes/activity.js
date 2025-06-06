@@ -1,5 +1,4 @@
 import express from 'express';
-import ActivityKeywords from '../models/ActivityKeywords.js';
 import { 
   createActivity, 
   getActivities, 
@@ -10,7 +9,8 @@ import {
   getActivityKeywords,
   getPendingActivities,
   approveActivity,
-  rejectActivity
+  rejectActivity,
+  getPublishedActivities
 } from '../controllers/activityController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -30,8 +30,6 @@ router.get('/latest/:count', authMiddleware, getLatestActivities);
 
 router.get('/activity-keywords', getActivityKeywords);
 
-
-
 router.get('/:activityId/registered-users', authMiddleware, getRegisteredUsers);
 
 // 获取待审核活动列表接口
@@ -43,7 +41,11 @@ router.put('/:activityId/approve', authMiddleware, approveActivity);
 // 审核拒绝活动接口
 router.put('/:activityId/reject', authMiddleware, rejectActivity);
 
+
+
+// 获取校组织发布的活动列表
+router.get('/published', authMiddleware, getPublishedActivities);
+
 // 获取活动详情接口
 router.get('/:activityId', authMiddleware, getActivityDetail);
-
 export default router;
